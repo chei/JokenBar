@@ -134,8 +134,8 @@ scripts/build-app.sh        # dist/JokenBar.app + dist/JokenBar.zip
 - `Sources/QuotaCore` – JSON parsing and display logic (Foundation only)
 - `Sources/JokenBar` – menu bar item, SwiftUI popover, WebKit sign-in
 
-Release: `git tag v0.1.0 && git push --tags` → GitHub Actions builds and uploads
-`JokenBar.zip` to Releases.
+Release: bump `VERSION` and push to `main` → GitHub Actions tags `v<VERSION>`,
+builds and uploads `JokenBar.zip` to Releases.
 
 ## Roadmap
 
