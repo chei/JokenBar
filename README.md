@@ -141,3 +141,7 @@ Release: `git tag v0.1.0 && git push --tags` → GitHub Actions builds and uploa
 
 - Burn rate and forecast (will included usage expire unused?)
 - Configurable hotkey
+
+## License
+
+[MIT](LICENSE)
