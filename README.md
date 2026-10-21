@@ -126,9 +126,9 @@ month ("≈").
 ## Development
 
 ```sh
-swift test                  # QuotaCore unit tests with real (anonymized) responses
+scripts/test.sh             # QuotaCore unit tests (swift test; also works with Command Line Tools only)
 swift run JokenBar          # run
-scripts/build-app.sh        # dist/JokenBar.app + dist/JokenBar.zip
+scripts/build-app.sh        # dist/JokenBar.app + dist/JokenBar.zip (universal with Xcode, host arch otherwise)
 ```
 
 - `Sources/QuotaCore` – JSON parsing and display logic (Foundation only)

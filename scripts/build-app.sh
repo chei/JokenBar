@@ -5,7 +5,13 @@ set -euo pipefail
 
 VERSION="${VERSION:-0.1.0}"
 SIGN_IDENTITY="${SIGN_IDENTITY:--}"
-ARCHS=(--arch arm64 --arch x86_64)
+# Universal builds need xcbuild, which only ships with Xcode; Command Line Tools build the host arch.
+if [[ -x "$(xcode-select -p)/../SharedFrameworks/XCBuild.framework/Versions/A/Support/xcbuild" ]]; then
+  ARCHS=(--arch arm64 --arch x86_64)
+else
+  echo "xcbuild not found (no Xcode): building $(uname -m) only" >&2
+  ARCHS=(--arch "$(uname -m)")
+fi
 
 swift build -c release "${ARCHS[@]}"
 BIN_DIR="$(swift build -c release "${ARCHS[@]}" --show-bin-path)"
