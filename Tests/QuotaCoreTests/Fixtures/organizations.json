@@ -1,0 +1,2 @@
+[{"id":1,"uuid":"org-enterprise","name":"Example Org","settings":{"allowed_invite_domains":["example.com"]},"capabilities":["raven","chat","raven_enterprise"],"raven_type":"enterprise","free_credits_status":"granted_manually"},
+ {"id":2,"uuid":"org-api-only","name":"Console org","capabilities":["api"]}]
