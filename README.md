@@ -12,7 +12,7 @@ bar. No Dock icon, no system permissions, one request to claude.ai every
 |---|---|
 | 🎁 `26%` | work (Enterprise) account: *Included usage* grant used |
 | 💲 `25%` | work account: monthly limit used once included usage has expired |
-| ⏱ `34%` | personal Pro/Max account: 5-hour limit used |
+| ⏱ `34%` | personal Pro/Max account: current session (5-hour limit) used |
 
 Color: 🟢 plenty left · 🟠 running low · 🔴 almost gone.
 

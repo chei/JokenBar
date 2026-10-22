@@ -57,6 +57,14 @@ struct UsageSnapshotTests {
         #expect(snapshot.resetGrants[0].endsAt == date("2026-10-22T16:00:00+00:00"))
     }
 
+    @Test func proHeadlineIsSessionEvenWhenWeeklyIsHigher() throws {
+        let json = String(decoding: try fixture("pro_usage"), as: UTF8.self)
+            .replacingOccurrences(of: "\"percent\": 0", with: "\"percent\": 40")
+        let snapshot = try UsageSnapshot.parse(Data(json.utf8))
+        #expect(snapshot.percentLimits.map(\.percent) == [3, 40])
+        #expect(snapshot.headline().shortText == "3%")
+    }
+
     @Test func unexpectedShapesDoNotThrow() throws {
         let data = Data(#"{"limits": "surprise", "new_thing": {"limit_dollars": 50, "used_dollars": 45}}"#.utf8)
         let snapshot = try UsageSnapshot.parse(data)

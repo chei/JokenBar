@@ -98,10 +98,12 @@ public extension UsageSnapshot {
     }
 
     /// The single value shown in the menu bar.
-    /// Included grant while it lasts, then the monthly budget, then percent limits.
+    /// Included grant while it lasts, then the monthly budget, then the session
+    /// limit (else the highest percent limit).
     func headline(now: Date = Date()) -> Headline {
         if let included = activeIncluded(now: now) { return .included(included) }
         if let budget = monthlyBudget, budget.enabled, budget.limit > 0 { return .monthly(budget) }
+        if let session = percentLimits.first(where: { $0.kind == "session" }) { return .percent(session) }
         if let worst = percentLimits.max(by: { $0.percent < $1.percent }) { return .percent(worst) }
         return .unknown
     }
