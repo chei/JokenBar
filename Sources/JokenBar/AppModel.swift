@@ -26,6 +26,9 @@ final class AppModel: ObservableObject {
     @Published var primaryOrgID: String? {
         didSet { UserDefaults.standard.set(primaryOrgID, forKey: Keys.primaryOrg) }
     }
+    @Published var hotKeyEnabled: Bool {
+        didSet { UserDefaults.standard.set(hotKeyEnabled, forKey: Keys.hotKeyEnabled) }
+    }
 
     private var sessions: [UUID: ClaudeSession] = [:]
     private var loginWindow: LoginWindowController?
@@ -33,6 +36,7 @@ final class AppModel: ObservableObject {
     private enum Keys {
         static let accounts = "accounts"
         static let primaryOrg = "primaryOrgID"
+        static let hotKeyEnabled = "hotKeyEnabled"
     }
 
     init() {
@@ -41,6 +45,7 @@ final class AppModel: ObservableObject {
             .flatMap { try? JSONDecoder().decode([Account].self, from: $0) }
         _accounts = Published(initialValue: saved ?? [])
         _primaryOrgID = Published(initialValue: defaults.string(forKey: Keys.primaryOrg))
+        _hotKeyEnabled = Published(initialValue: defaults.object(forKey: Keys.hotKeyEnabled) as? Bool ?? true)
     }
 
     // MARK: Menu bar

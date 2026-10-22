@@ -3,15 +3,18 @@ import SwiftUI
 
 struct PopoverView: View {
     @EnvironmentObject private var model: AppModel
+    let showMenu: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
             if model.accounts.isEmpty {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("JokenBar").font(.headline)
-                    Text("Add a claude.ai account below. You can add both work and personal accounts.")
+                    Text("Track your Claude usage limits. You can add both work and personal accounts.")
                         .font(.callout)
                         .foregroundStyle(.secondary)
+                    Button("Add Account…") { model.login() }
+                        .buttonStyle(.borderedProminent)
                 }
             } else {
                 ForEach(model.accounts) { account in
@@ -21,7 +24,7 @@ struct PopoverView: View {
                 }
             }
             Divider()
-            FooterView()
+            FooterView(showMenu: showMenu)
         }
         .padding(14)
         .frame(width: 340)
@@ -167,35 +170,29 @@ private struct UsageBar: View {
 
 private struct FooterView: View {
     @EnvironmentObject private var model: AppModel
+    let showMenu: () -> Void
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            HStack(spacing: 12) {
-                Toggle("Launch at login", isOn: Binding(
-                    get: { model.launchAtLogin },
-                    set: { model.launchAtLogin = $0 }
-                ))
+        HStack {
+            if let lastRefresh = model.lastRefresh {
+                Text("Updated \(lastRefresh.formatted(date: .omitted, time: .shortened))")
+                    .font(.caption)
+                    .foregroundStyle(.secondary)
             }
-            .toggleStyle(.checkbox)
-            .font(.caption)
-            HStack {
-                if let lastRefresh = model.lastRefresh {
-                    Text("Updated \(lastRefresh.formatted(date: .omitted, time: .shortened))")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                }
-                Button {
-                    Task { await model.refreshAll() }
-                } label: {
-                    Image(systemName: "arrow.clockwise")
-                }
-                .buttonStyle(.borderless)
-                .disabled(model.isRefreshing)
-                .help("Refresh")
-                Spacer()
-                Button("Add Account…") { model.login() }
-                Button("Quit") { NSApp.terminate(nil) }
+            Button {
+                Task { await model.refreshAll() }
+            } label: {
+                Image(systemName: "arrow.clockwise")
             }
+            .buttonStyle(.borderless)
+            .disabled(model.isRefreshing)
+            .help("Refresh")
+            Spacer()
+            Button(action: showMenu) {
+                Image(systemName: "gearshape")
+            }
+            .buttonStyle(.borderless)
+            .help("Settings")
         }
     }
 }
