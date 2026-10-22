@@ -20,7 +20,9 @@ struct PopoverView: View {
                 }
             }
             Divider()
-            FooterView()
+            if !model.accounts.isEmpty {
+                FooterView()
+            }
             VStack(alignment: .leading, spacing: 0) {
                 if model.accounts.isEmpty {
                     SettingsView()
