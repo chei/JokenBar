@@ -122,6 +122,7 @@ final class AppModel: ObservableObject {
                 guard let self else { return }
                 if !self.accounts.contains(where: { $0.id == accountID }) {
                     self.accounts.append(Account(id: accountID, organizations: orgs))
+                    self.saveAccounts()
                 }
                 self.updateOrganizations(orgs, for: accountID)
                 self.sessions[accountID] = nil
