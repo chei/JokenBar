@@ -72,6 +72,9 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         } else if let button = statusItem.button {
             NSApp.activate(ignoringOtherApps: true)
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
+            // With keyboard navigation on, AppKit focuses the first button right away;
+            // start unfocused so the focus ring only shows once the user presses Tab.
+            DispatchQueue.main.async { self.popover.contentViewController?.view.window?.makeFirstResponder(nil) }
             Task { await model.refreshIfStale() }
         }
     }
