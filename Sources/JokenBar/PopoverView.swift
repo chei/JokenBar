@@ -154,15 +154,20 @@ private struct GaugeRow: View {
     }
 }
 
+/// Styled after claude.ai: the track turns faintly blue once usage has started,
+/// so an untouched limit (e.g. monthly while included usage lasts) stays grey.
 private struct UsageBar: View {
     let used: Double
 
+    private static let fill = Color(red: 36 / 255, green: 126 / 255, blue: 224 / 255)
+
     var body: some View {
+        let fraction = min(max(used, 0), 1)
         GeometryReader { geometry in
             ZStack(alignment: .leading) {
-                Capsule().fill(Color.primary.opacity(0.12))
-                Capsule().fill(Color.blue)
-                    .frame(width: geometry.size.width * min(max(used, 0), 1))
+                Capsule().fill(fraction > 0 ? Self.fill.opacity(0.18) : Color.primary.opacity(0.12))
+                Capsule().fill(Self.fill)
+                    .frame(width: geometry.size.width * fraction)
             }
         }
         .frame(height: 5)
