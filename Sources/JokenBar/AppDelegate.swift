@@ -21,6 +21,7 @@ enum JokenBarMain {
 final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     private let model = AppModel()
     private let popover = NSPopover()
+    private var hosting: NSHostingController<AnyView>!
     private var statusItem: NSStatusItem!
     private var hotKey: HotKey?
     private var timer: Timer?
@@ -33,7 +34,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         statusItem.button?.target = self
         statusItem.button?.action = #selector(togglePopover)
 
-        let hosting = NSHostingController(rootView: PopoverView().environmentObject(model))
+        let popoverView = PopoverView { [weak self] in self?.toggleSettings() }
+        hosting = NSHostingController(rootView: AnyView(popoverView.environmentObject(model)))
         hosting.sizingOptions = [.preferredContentSize]
         popover.contentViewController = hosting
         popover.behavior = .transient
@@ -79,8 +81,29 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         }
     }
 
+    /// Opening just adds the section; the popover animates its growth. Closing
+    /// first shrinks the popover over the still-visible section, then removes it,
+    /// since removing it first would leave an empty area to shrink.
+    private func toggleSettings() {
+        guard model.settingsExpanded else {
+            model.settingsExpanded = true
+            model.settingsShown = true
+            return
+        }
+        model.settingsExpanded = false
+        hosting.sizingOptions = []
+        var size = popover.contentSize
+        size.height -= model.settingsHeight + 10 // + the VStack spacing above it
+        popover.contentSize = size
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { [self] in
+            if !model.settingsExpanded { model.settingsShown = false }
+            hosting.sizingOptions = [.preferredContentSize]
+        }
+    }
+
     func popoverDidClose(_ notification: Notification) {
         model.settingsExpanded = false
+        model.settingsShown = false
     }
 
     private func updateHotKey() {

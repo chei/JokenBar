@@ -3,6 +3,7 @@ import SwiftUI
 
 struct PopoverView: View {
     @EnvironmentObject private var model: AppModel
+    let toggleSettings: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -23,17 +24,20 @@ struct PopoverView: View {
             Divider()
             FooterView()
             if !model.accounts.isEmpty {
-                SettingsDisclosure()
+                SettingsDisclosure(toggle: toggleSettings)
             }
-            if model.settingsExpanded || model.accounts.isEmpty {
+            if model.settingsShown || model.accounts.isEmpty {
                 SettingsView()
-                    .transition(.asymmetric(insertion: .opacity.combined(with: .offset(y: -6)), removal: .opacity))
+                    .background(GeometryReader { geometry in
+                        Color.clear.onAppear { model.settingsHeight = geometry.size.height }
+                            .onChange(of: geometry.size.height) { model.settingsHeight = $1 }
+                    })
             }
         }
         .padding(14)
         .frame(width: 340)
-        // Pin content to the top while the popover window resizes, so only the
-        // settings section moves when it opens or closes.
+        // The popover animates its own resize; pinned to the top, the settings
+        // section is revealed (or covered) while everything above stays put.
         .frame(maxHeight: .infinity, alignment: .top)
     }
 }
@@ -192,14 +196,14 @@ private struct FooterView: View {
 /// Full-width disclosure row, like "Other Networks" in the Wi-Fi menu.
 private struct SettingsDisclosure: View {
     @EnvironmentObject private var model: AppModel
+    let toggle: () -> Void
 
     var body: some View {
-        MenuRow(title: "Settings") {
-            withAnimation(.easeInOut(duration: 0.2)) { model.settingsExpanded.toggle() }
-        } trailing: {
+        MenuRow(title: "Settings", action: toggle) {
             Image(systemName: "chevron.right")
                 .font(.caption.weight(.semibold))
                 .rotationEffect(.degrees(model.settingsExpanded ? 90 : 0))
+                .animation(.easeInOut(duration: 0.2), value: model.settingsExpanded)
         }
         .font(.headline)
     }

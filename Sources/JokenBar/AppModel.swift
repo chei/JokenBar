@@ -24,7 +24,12 @@ final class AppModel: ObservableObject {
     @Published private(set) var lastRefresh: Date?
     @Published private(set) var isRefreshing = false
     /// The popover's settings section; collapses whenever the popover closes.
+    /// `settingsShown` lags behind on collapse while the popover shrinks around it.
     @Published var settingsExpanded = false
+    @Published var settingsShown = false
+    /// Measured height of the settings section, so the popover can shrink
+    /// around it before it is removed.
+    var settingsHeight: CGFloat = 0
     @Published var hotKeyEnabled: Bool {
         didSet { UserDefaults.standard.set(hotKeyEnabled, forKey: Keys.hotKeyEnabled) }
     }
