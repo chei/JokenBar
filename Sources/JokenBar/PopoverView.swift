@@ -135,26 +135,31 @@ private struct GaugeRow: View {
     /// 0…1, fills from the left like the bars on claude.ai's usage page.
     let used: Double
     let footnote: String?
-    /// Dollar limit, shown as "Total $200"; nil for percent-only limits.
+    /// Dollar limit, shown after the title ("Monthly · $200"); nil for percent-only limits.
     var total: Double?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 3) {
             HStack {
-                Text(title).font(.subheadline.weight(.medium))
+                HStack(spacing: 4) {
+                    Text(title).font(.subheadline.weight(.medium))
+                    if let total {
+                        Text("· \(Fmt.usd(total, decimals: 0))")
+                            .font(.subheadline.monospacedDigit())
+                            .foregroundStyle(.secondary)
+                    }
+                }
                 Spacer()
                 Text("\(Int((used * 100).rounded()))% used")
                     .font(.subheadline.monospacedDigit())
                     .foregroundStyle(.secondary)
             }
             UsageBar(used: used)
-            HStack {
-                if let footnote { Text(footnote) }
-                Spacer()
-                if let total { Text("Total \(Fmt.usd(total, decimals: 0))") }
+            if let footnote {
+                Text(footnote)
+                    .font(.caption.monospacedDigit())
+                    .foregroundStyle(.secondary)
             }
-            .font(.caption.monospacedDigit())
-            .foregroundStyle(.secondary)
         }
     }
 }
