@@ -39,8 +39,6 @@ private struct OrgCard: View {
         } else {
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
-                    Text(org.displayName).font(.headline).lineLimit(1)
-                    Spacer()
                     if model.visibleOrgs.count > 1 {
                         Button {
                             model.primaryOrgID = org.uuid
@@ -50,6 +48,8 @@ private struct OrgCard: View {
                         .buttonStyle(.borderless)
                         .help(isFavorite ? "Shown in menu bar" : "Show in menu bar")
                     }
+                    Text(org.displayName).font(.headline).lineLimit(1)
+                    Spacer()
                     Button {
                         model.remove(account)
                     } label: {
