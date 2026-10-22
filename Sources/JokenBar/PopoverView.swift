@@ -22,16 +22,19 @@ struct PopoverView: View {
             }
             Divider()
             FooterView()
+            if !model.accounts.isEmpty {
+                SettingsDisclosure()
+            }
             if model.settingsExpanded || model.accounts.isEmpty {
-                VStack(alignment: .leading, spacing: 10) {
-                    Divider()
-                    SettingsView()
-                }
-                .transition(.move(edge: .top).combined(with: .opacity))
+                SettingsView()
+                    .transition(.asymmetric(insertion: .opacity.combined(with: .offset(y: -6)), removal: .opacity))
             }
         }
         .padding(14)
         .frame(width: 340)
+        // Pin content to the top while the popover window resizes, so only the
+        // settings section moves when it opens or closes.
+        .frame(maxHeight: .infinity, alignment: .top)
     }
 }
 
@@ -182,23 +185,23 @@ private struct FooterView: View {
             .disabled(model.isRefreshing)
             .help("Refresh")
             Spacer()
-            if !model.accounts.isEmpty {
-                // Disclosure like "Other Networks" in the Wi-Fi menu.
-                Button {
-                    withAnimation(.easeInOut(duration: 0.2)) { model.settingsExpanded.toggle() }
-                } label: {
-                    HStack(spacing: 4) {
-                        Text("Settings")
-                        Image(systemName: "chevron.right")
-                            .font(.caption.weight(.semibold))
-                            .rotationEffect(.degrees(model.settingsExpanded ? 90 : 0))
-                    }
-                    .contentShape(Rectangle())
-                }
-                .buttonStyle(.plain)
-                .foregroundStyle(.secondary)
-            }
         }
+    }
+}
+
+/// Full-width disclosure row, like "Other Networks" in the Wi-Fi menu.
+private struct SettingsDisclosure: View {
+    @EnvironmentObject private var model: AppModel
+
+    var body: some View {
+        MenuRow(title: "Settings") {
+            withAnimation(.easeInOut(duration: 0.2)) { model.settingsExpanded.toggle() }
+        } trailing: {
+            Image(systemName: "chevron.right")
+                .font(.caption.weight(.semibold))
+                .rotationEffect(.degrees(model.settingsExpanded ? 90 : 0))
+        }
+        .font(.headline)
     }
 }
 
@@ -207,10 +210,22 @@ private struct SettingsView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
-            ForEach(model.accounts) { account in
-                ForEach(Array(account.organizations.enumerated()), id: \.element.id) { index, org in
-                    // One sign-in can hold several orgs; offer removal once per sign-in.
-                    OrgSettingsRow(org: org, remove: index == 0 ? { model.remove(account) } : nil)
+            if !model.accounts.isEmpty {
+                List {
+                    ForEach(model.accounts) { account in
+                        AccountRow(account: account)
+                    }
+                    .onMove { model.moveAccounts(from: $0, to: $1) }
+                }
+                .listStyle(.plain)
+                .scrollContentBackground(.hidden)
+                .scrollDisabled(true)
+                .frame(height: CGFloat(model.accounts.count) * 26)
+                if model.accounts.count > 1 {
+                    Text("Drag to reorder · the top account is shown in the menu bar")
+                        .font(.caption)
+                        .foregroundStyle(.secondary)
+                        .padding(.horizontal, 6)
                 }
             }
             MenuRow(title: "Add Account…") { model.login() }
@@ -227,49 +242,34 @@ private struct SettingsView: View {
     }
 }
 
-/// Star picks the org shown in the menu bar; trash removes the whole sign-in.
-private struct OrgSettingsRow: View {
+private struct AccountRow: View {
     @EnvironmentObject private var model: AppModel
-    let org: Organization
-    let remove: (() -> Void)?
-
-    private var isFavorite: Bool { model.favoriteOrgID == org.uuid }
-    private var canStar: Bool {
-        model.visibleOrgs.count > 1 && model.visibleOrgs.contains { $0.uuid == org.uuid }
-    }
+    let account: Account
 
     var body: some View {
         HStack {
-            if canStar {
-                Button {
-                    model.primaryOrgID = org.uuid
-                } label: {
-                    Image(systemName: isFavorite ? "star.fill" : "star")
-                }
-                .buttonStyle(.borderless)
-                .help(isFavorite ? "Shown in menu bar" : "Show in menu bar")
-            }
-            Text(org.displayName)
+            Text(account.organizations.map(\.displayName).joined(separator: ", "))
                 .lineLimit(1)
                 .truncationMode(.middle)
             Spacer()
-            if let remove {
-                Button(action: remove) {
-                    Image(systemName: "trash")
-                }
-                .buttonStyle(.borderless)
-                .help("Remove account")
+            Button {
+                model.remove(account)
+            } label: {
+                Image(systemName: "trash")
             }
+            .buttonStyle(.borderless)
+            .help("Remove account")
         }
-        .padding(.horizontal, 6)
+        .listRowSeparator(.hidden)
+        .listRowBackground(Color.clear)
     }
 }
 
 /// A plain, menu-like row that highlights on hover.
-private struct MenuRow: View {
+private struct MenuRow<Trailing: View>: View {
     let title: String
-    var shortcut: String?
     let action: () -> Void
+    @ViewBuilder let trailing: Trailing
     @State private var isHovered = false
     /// Expanding the section can lay a row out under a still mouse, which AppKit
     /// reports as hover; only highlight once the mouse has actually moved.
@@ -280,9 +280,7 @@ private struct MenuRow: View {
             HStack {
                 Text(title)
                 Spacer()
-                if let shortcut {
-                    Text(shortcut).foregroundStyle(isHovered ? Color.white : Color.secondary)
-                }
+                trailing.foregroundStyle(isHovered ? Color.white : Color.secondary)
             }
             .padding(.horizontal, 6)
             .padding(.vertical, 3)
@@ -298,6 +296,12 @@ private struct MenuRow: View {
             case .ended: isHovered = false
             }
         }
+    }
+}
+
+extension MenuRow where Trailing == Text? {
+    init(title: String, shortcut: String? = nil, action: @escaping () -> Void) {
+        self.init(title: title, action: action) { shortcut.map { Text($0) } }
     }
 }
 

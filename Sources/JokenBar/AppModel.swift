@@ -23,9 +23,6 @@ final class AppModel: ObservableObject {
     @Published private(set) var states: [String: OrgState] = [:]
     @Published private(set) var lastRefresh: Date?
     @Published private(set) var isRefreshing = false
-    @Published var primaryOrgID: String? {
-        didSet { UserDefaults.standard.set(primaryOrgID, forKey: Keys.primaryOrg) }
-    }
     /// The popover's settings section; collapses whenever the popover closes.
     @Published var settingsExpanded = false
     @Published var hotKeyEnabled: Bool {
@@ -37,7 +34,6 @@ final class AppModel: ObservableObject {
 
     private enum Keys {
         static let accounts = "accounts"
-        static let primaryOrg = "primaryOrgID"
         static let hotKeyEnabled = "hotKeyEnabled"
     }
 
@@ -46,30 +42,13 @@ final class AppModel: ObservableObject {
         let saved = defaults.data(forKey: Keys.accounts)
             .flatMap { try? JSONDecoder().decode([Account].self, from: $0) }
         _accounts = Published(initialValue: saved ?? [])
-        _primaryOrgID = Published(initialValue: defaults.string(forKey: Keys.primaryOrg))
         _hotKeyEnabled = Published(initialValue: defaults.object(forKey: Keys.hotKeyEnabled) as? Bool ?? true)
     }
 
     // MARK: Menu bar
 
-    /// Orgs that get a card in the popover.
-    var visibleOrgs: [Organization] {
-        accounts.flatMap(\.organizations).filter {
-            if case .unavailable? = states[$0.uuid] { return false }
-            return true
-        }
-    }
-
-    /// The starred org; defaults to the first one.
-    var favoriteOrgID: String? {
-        let orgs = visibleOrgs
-        if let id = primaryOrgID, orgs.contains(where: { $0.uuid == id }) { return id }
-        return orgs.first?.uuid
-    }
-
-    /// The org shown in the menu bar: the favorite, else the first that loaded.
+    /// The org shown in the menu bar: the topmost one that loaded.
     var menuBarSnapshot: UsageSnapshot? {
-        if let id = favoriteOrgID, case .loaded(let snapshot)? = states[id] { return snapshot }
         for account in accounts {
             for org in account.organizations {
                 if case .loaded(let snapshot)? = states[org.uuid] { return snapshot }
@@ -148,6 +127,12 @@ final class AppModel: ObservableObject {
             onClose: { [weak self] in self?.loginWindow = nil }
         )
         loginWindow?.start()
+    }
+
+    /// Drag-to-reorder in settings; the order also decides the menu bar org.
+    func moveAccounts(from source: IndexSet, to destination: Int) {
+        accounts.move(fromOffsets: source, toOffset: destination)
+        saveAccounts()
     }
 
     func remove(_ account: Account) {
