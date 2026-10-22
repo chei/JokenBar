@@ -77,7 +77,7 @@ scripts/build-app.sh && cp -R dist/JokenBar.app /Applications/ && open /Applicat
 
 **Update:** run the install command again, or download the zip again.
 
-**Uninstall:** in the app, *… → Remove Account* for each account, then Quit, then:
+**Uninstall:** in the app, remove each account with its trash button, then Quit, then:
 
 ```sh
 rm -rf /Applications/JokenBar.app ~/Applications/JokenBar.app

@@ -50,15 +50,13 @@ private struct OrgCard: View {
                         .buttonStyle(.borderless)
                         .help(isFavorite ? "Shown in menu bar" : "Show in menu bar")
                     }
-                    Menu {
-                        Button("Sign In Again…") { model.login(account) }
-                        Button("Remove Account", role: .destructive) { model.remove(account) }
+                    Button {
+                        model.remove(account)
                     } label: {
-                        Image(systemName: "ellipsis.circle")
+                        Image(systemName: "trash")
                     }
-                    .menuStyle(.borderlessButton)
-                    .menuIndicator(.hidden)
-                    .fixedSize()
+                    .buttonStyle(.borderless)
+                    .help("Remove account")
                 }
                 content
             }
