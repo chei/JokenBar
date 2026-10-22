@@ -221,49 +221,51 @@ private struct SettingsDisclosure: View {
 private struct SettingsView: View {
     @EnvironmentObject private var model: AppModel
 
+    // Groups get the same 10pt rhythm as the rest of the popover; rows within a group sit closer.
     var body: some View {
-        VStack(alignment: .leading, spacing: 4) {
-            if !model.accounts.isEmpty {
-                List {
-                    ForEach(model.accounts) { account in
-                        AccountRow(account: account)
+        VStack(alignment: .leading, spacing: 10) {
+            VStack(alignment: .leading, spacing: 6) {
+                if !model.accounts.isEmpty {
+                    List {
+                        ForEach(model.accounts) { account in
+                            AccountRow(account: account)
+                        }
+                        .onMove { model.moveAccounts(from: $0, to: $1) }
                     }
-                    .onMove { model.moveAccounts(from: $0, to: $1) }
+                    .listStyle(.plain)
+                    .scrollContentBackground(.hidden)
+                    .scrollDisabled(true)
+                    .frame(height: CGFloat(model.accounts.count) * 26)
+                    if model.accounts.count > 1 {
+                        Text("Drag to reorder · the top account is shown in the menu bar")
+                            .font(.caption)
+                            .foregroundStyle(.secondary)
+                    }
                 }
-                .listStyle(.plain)
-                .scrollContentBackground(.hidden)
-                .scrollDisabled(true)
-                .frame(height: CGFloat(model.accounts.count) * 26)
-                if model.accounts.count > 1 {
-                    Text("Drag to reorder · the top account is shown in the menu bar")
-                        .font(.caption)
-                        .foregroundStyle(.secondary)
-                        .padding(.horizontal, 6)
+                // The only sensible step without accounts, so prominent then.
+                if model.accounts.isEmpty {
+                    Button("Add Account…") { model.login() }
+                        .buttonStyle(.borderedProminent)
+                } else {
+                    Button("Add Account…") { model.login() }
                 }
-            }
-            // The only sensible step without accounts, so prominent then.
-            if model.accounts.isEmpty {
-                Button("Add Account…") { model.login() }
-                    .buttonStyle(.borderedProminent)
-                    .padding(.horizontal, 6)
-            } else {
-                Button("Add Account…") { model.login() }
-                    .padding(.horizontal, 6)
             }
             Divider()
-            SwitchRow(title: "Launch at Login", isOn: Binding(
-                get: { model.launchAtLogin },
-                set: { model.launchAtLogin = $0 }
-            ))
-            SwitchRow(title: "Global Shortcut", shortcut: "⌃⌥J", isOn: $model.hotKeyEnabled)
+            VStack(alignment: .leading, spacing: 6) {
+                SwitchRow(title: "Launch at Login", isOn: Binding(
+                    get: { model.launchAtLogin },
+                    set: { model.launchAtLogin = $0 }
+                ))
+                SwitchRow(title: "Global Shortcut", shortcut: "⌃⌥J", isOn: $model.hotKeyEnabled)
+            }
             Divider()
             HStack {
                 Spacer()
                 Button("Quit JokenBar") { NSApp.terminate(nil) }
                     .keyboardShortcut("q")
             }
-            .padding(.horizontal, 6)
         }
+        .padding(.horizontal, 6)
     }
 }
 
@@ -287,6 +289,7 @@ private struct AccountRow: View {
         }
         .listRowSeparator(.hidden)
         .listRowBackground(Color.clear)
+        .listRowInsets(EdgeInsets())
     }
 }
 
@@ -341,7 +344,6 @@ private struct SwitchRow: View {
                 .toggleStyle(.switch)
                 .controlSize(.mini)
         }
-        .padding(.horizontal, 6)
     }
 }
 
