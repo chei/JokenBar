@@ -23,8 +23,11 @@ struct PopoverView: View {
             Divider()
             FooterView()
             if model.settingsExpanded || model.accounts.isEmpty {
-                Divider()
-                SettingsView()
+                VStack(alignment: .leading, spacing: 10) {
+                    Divider()
+                    SettingsView()
+                }
+                .transition(.move(edge: .top).combined(with: .opacity))
             }
         }
         .padding(14)
@@ -194,13 +197,20 @@ private struct FooterView: View {
             .help("Refresh")
             Spacer()
             if !model.accounts.isEmpty {
+                // Disclosure like "Other Networks" in the Wi-Fi menu.
                 Button {
-                    model.settingsExpanded.toggle()
+                    withAnimation(.easeInOut(duration: 0.2)) { model.settingsExpanded.toggle() }
                 } label: {
-                    Image(systemName: model.settingsExpanded ? "gearshape.fill" : "gearshape")
+                    HStack(spacing: 4) {
+                        Text("Settings")
+                        Image(systemName: "chevron.right")
+                            .font(.caption.weight(.semibold))
+                            .rotationEffect(.degrees(model.settingsExpanded ? 90 : 0))
+                    }
+                    .contentShape(Rectangle())
                 }
-                .buttonStyle(.borderless)
-                .help("Settings")
+                .buttonStyle(.plain)
+                .foregroundStyle(.secondary)
             }
         }
     }
