@@ -45,27 +45,13 @@ private struct OrgCard: View {
             EmptyView()
         } else {
             VStack(alignment: .leading, spacing: 8) {
-                HStack {
-                    if model.visibleOrgs.count > 1 {
-                        Button {
-                            model.primaryOrgID = org.uuid
-                        } label: {
-                            Image(systemName: isFavorite ? "star.fill" : "star")
-                        }
-                        .buttonStyle(.borderless)
-                        .help(isFavorite ? "Shown in menu bar" : "Show in menu bar")
-                    }
-                    Text(org.displayName).font(.headline).lineLimit(1)
-                    Spacer()
-                }
+                Text(org.displayName).font(.headline).lineLimit(1)
                 content
             }
             .padding(10)
             .background(Color.primary.opacity(0.05), in: RoundedRectangle(cornerRadius: 8))
         }
     }
-
-    private var isFavorite: Bool { model.favoriteOrgID == org.uuid }
 
     @ViewBuilder private var content: some View {
         switch model.states[org.uuid] {
@@ -222,20 +208,10 @@ private struct SettingsView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
             ForEach(model.accounts) { account in
-                HStack {
-                    Text(account.organizations.map(\.displayName).joined(separator: ", "))
-                        .lineLimit(1)
-                        .truncationMode(.middle)
-                    Spacer()
-                    Button {
-                        model.remove(account)
-                    } label: {
-                        Image(systemName: "trash")
-                    }
-                    .buttonStyle(.borderless)
-                    .help("Remove account")
+                ForEach(Array(account.organizations.enumerated()), id: \.element.id) { index, org in
+                    // One sign-in can hold several orgs; offer removal once per sign-in.
+                    OrgSettingsRow(org: org, remove: index == 0 ? { model.remove(account) } : nil)
                 }
-                .padding(.horizontal, 6)
             }
             MenuRow(title: "Add Account…") { model.login() }
             Divider()
@@ -248,6 +224,44 @@ private struct SettingsView: View {
             MenuRow(title: "Quit JokenBar", shortcut: "⌘Q") { NSApp.terminate(nil) }
                 .keyboardShortcut("q")
         }
+    }
+}
+
+/// Star picks the org shown in the menu bar; trash removes the whole sign-in.
+private struct OrgSettingsRow: View {
+    @EnvironmentObject private var model: AppModel
+    let org: Organization
+    let remove: (() -> Void)?
+
+    private var isFavorite: Bool { model.favoriteOrgID == org.uuid }
+    private var canStar: Bool {
+        model.visibleOrgs.count > 1 && model.visibleOrgs.contains { $0.uuid == org.uuid }
+    }
+
+    var body: some View {
+        HStack {
+            if canStar {
+                Button {
+                    model.primaryOrgID = org.uuid
+                } label: {
+                    Image(systemName: isFavorite ? "star.fill" : "star")
+                }
+                .buttonStyle(.borderless)
+                .help(isFavorite ? "Shown in menu bar" : "Show in menu bar")
+            }
+            Text(org.displayName)
+                .lineLimit(1)
+                .truncationMode(.middle)
+            Spacer()
+            if let remove {
+                Button(action: remove) {
+                    Image(systemName: "trash")
+                }
+                .buttonStyle(.borderless)
+                .help("Remove account")
+            }
+        }
+        .padding(.horizontal, 6)
     }
 }
 

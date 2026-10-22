@@ -60,8 +60,8 @@ scripts/build-app.sh && cp -R dist/JokenBar.app /Applications/ && open /Applicat
 1. The icon appears in the menu bar and a small window opens → **Add Account…**
 2. Sign in to claude.ai just like in your browser (company SSO, Google or email
    code). The window closes by itself once you're in.
-3. Personal account too? **Settings ›** → **Add Account…** → sign in again. Star the account
-   to show in the menu bar (the first one by default).
+3. Personal account too? **Settings ›** → **Add Account…** → sign in again. Under
+   **Settings ›**, star the account to show in the menu bar (the first one by default).
 4. Optionally **Settings ›** → **Launch at Login**. Settings can also turn off the
    ⌃⌥J shortcut.
 
