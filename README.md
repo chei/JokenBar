@@ -57,7 +57,7 @@ scripts/build-app.sh && cp -R dist/JokenBar.app /Applications/ && open /Applicat
 
 ## First launch
 
-1. The icon appears in the menu bar and a small window opens → **Sign In…**
+1. The icon appears in the menu bar and a small window opens → **Add Account…**
 2. Sign in to claude.ai just like in your browser (company SSO, Google or email
    code). The window closes by itself once you're in.
 3. Personal account too? **Add Account…** → sign in again. Use the ▭ button to

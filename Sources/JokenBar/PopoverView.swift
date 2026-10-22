@@ -9,11 +9,9 @@ struct PopoverView: View {
             if model.accounts.isEmpty {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("JokenBar").font(.headline)
-                    Text("Sign in to claude.ai. You can add both work and personal accounts.")
+                    Text("Add a claude.ai account below. You can add both work and personal accounts.")
                         .font(.callout)
                         .foregroundStyle(.secondary)
-                    Button("Sign In…") { model.login() }
-                        .buttonStyle(.borderedProminent)
                 }
             } else {
                 ForEach(model.accounts) { account in
