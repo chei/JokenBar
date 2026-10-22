@@ -21,7 +21,7 @@ enum JokenBarMain {
 final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     private let model = AppModel()
     private let popover = NSPopover()
-    private var hosting: NSHostingController<AnyView>!
+    private var revealTimer: Timer?
     private var statusItem: NSStatusItem!
     private var hotKey: HotKey?
     private var timer: Timer?
@@ -35,7 +35,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         statusItem.button?.action = #selector(togglePopover)
 
         let popoverView = PopoverView { [weak self] in self?.toggleSettings() }
-        hosting = NSHostingController(rootView: AnyView(popoverView.environmentObject(model)))
+        let hosting = NSHostingController(rootView: popoverView.environmentObject(model))
         hosting.sizingOptions = [.preferredContentSize]
         popover.contentViewController = hosting
         popover.behavior = .transient
@@ -81,29 +81,37 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         }
     }
 
-    /// Opening just adds the section; the popover animates its growth. Closing
-    /// first shrinks the popover over the still-visible section, then removes it,
-    /// since removing it first would leave an empty area to shrink.
+    /// Animates the settings section by stepping its revealed height; the popover
+    /// resizes with every step (its own resize animation is off meanwhile).
     private func toggleSettings() {
-        guard model.settingsExpanded else {
-            model.settingsExpanded = true
-            model.settingsShown = true
-            return
+        model.settingsExpanded.toggle()
+        let start = model.settingsReveal
+        let target: CGFloat = model.settingsExpanded ? 1 : 0
+        let duration = 0.25 * abs(target - start)
+        let began = CACurrentMediaTime()
+        popover.animates = false
+        revealTimer?.invalidate()
+        let timer = Timer(timeInterval: 1.0 / 120, repeats: true) { [weak self] timer in
+            MainActor.assumeIsolated {
+                guard let self else { return timer.invalidate() }
+                let t = duration > 0 ? min((CACurrentMediaTime() - began) / duration, 1) : 1
+                let eased = t < 0.5 ? 2 * t * t : 1 - pow(-2 * t + 2, 2) / 2
+                self.model.settingsReveal = start + (target - start) * eased
+                if t >= 1 {
+                    timer.invalidate()
+                    self.popover.animates = true
+                }
+            }
         }
-        model.settingsExpanded = false
-        hosting.sizingOptions = []
-        var size = popover.contentSize
-        size.height -= model.settingsHeight + 10 // + the VStack spacing above it
-        popover.contentSize = size
-        DispatchQueue.main.asyncAfter(deadline: .now() + 0.25) { [self] in
-            if !model.settingsExpanded { model.settingsShown = false }
-            hosting.sizingOptions = [.preferredContentSize]
-        }
+        RunLoop.main.add(timer, forMode: .common)
+        revealTimer = timer
     }
 
     func popoverDidClose(_ notification: Notification) {
+        revealTimer?.invalidate()
+        popover.animates = true
         model.settingsExpanded = false
-        model.settingsShown = false
+        model.settingsReveal = 0
     }
 
     private func updateHotKey() {

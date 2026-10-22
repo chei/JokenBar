@@ -23,21 +23,30 @@ struct PopoverView: View {
             }
             Divider()
             FooterView()
-            if !model.accounts.isEmpty {
-                SettingsDisclosure(toggle: toggleSettings)
-            }
-            if model.settingsShown || model.accounts.isEmpty {
-                SettingsView()
-                    .background(GeometryReader { geometry in
-                        Color.clear.onAppear { model.settingsHeight = geometry.size.height }
-                            .onChange(of: geometry.size.height) { model.settingsHeight = $1 }
-                    })
+            VStack(alignment: .leading, spacing: 0) {
+                if model.accounts.isEmpty {
+                    SettingsView()
+                } else {
+                    SettingsDisclosure(toggle: toggleSettings)
+                    if model.settingsReveal > 0 {
+                        // Revealed from the top, frame by frame, like "Other Networks" in
+                        // the Wi-Fi menu; the popover follows the growing height.
+                        SettingsView()
+                            .padding(.top, 10)
+                            .fixedSize(horizontal: false, vertical: true)
+                            .background(GeometryReader { geometry in
+                                Color.clear.onAppear { model.settingsHeight = geometry.size.height }
+                                    .onChange(of: geometry.size.height) { model.settingsHeight = $1 }
+                            })
+                            .frame(height: model.settingsReveal * model.settingsHeight, alignment: .top)
+                            .clipped()
+                            .allowsHitTesting(model.settingsReveal == 1)
+                    }
+                }
             }
         }
         .padding(14)
         .frame(width: 340)
-        // The popover animates its own resize; pinned to the top, the settings
-        // section is revealed (or covered) while everything above stays put.
         .frame(maxHeight: .infinity, alignment: .top)
     }
 }
