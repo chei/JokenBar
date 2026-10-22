@@ -77,6 +77,18 @@ struct UsageSnapshotTests {
         #expect(reset == date("2026-11-01T00:00:00Z"))
     }
 
+    @Test func timeLeftUsesTwoUnitsBelowTwo() {
+        let now = date("2026-10-19T12:00:00Z")
+        let left = { (minutes: Double) in timeLeft(until: now.addingTimeInterval(minutes * 60), now: now) }
+        #expect(left(3 * 1440 + 100) == "3d left")
+        #expect(left(2 * 1440) == "2d left")
+        #expect(left(1440 + 5 * 60 + 30) == "1d 5h left")
+        #expect(left(5 * 60 + 59) == "5h left")
+        #expect(left(80) == "1h 20m left")
+        #expect(left(59.5) == "59m left")
+        #expect(left(-1) == "expired")
+    }
+
     @Test func organizationsKeepOnlyClaudeAIOrgs() throws {
         let orgs = try Organization.parseList(fixture("organizations"))
         #expect(orgs.map(\.uuid) == ["org-enterprise", "org-personal"])

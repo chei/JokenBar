@@ -113,3 +113,15 @@ public func nextMonthlyReset(after now: Date, calendar: Calendar = .current) -> 
     let startOfMonth = calendar.date(from: calendar.dateComponents([.year, .month], from: now))!
     return calendar.date(byAdding: .month, value: 1, to: startOfMonth)!
 }
+
+/// "3d left", or two units below 2 so the last stretch stays precise: "1d 5h left", "1h 20m left".
+public func timeLeft(until date: Date, now: Date) -> String {
+    let minutes = Int(date.timeIntervalSince(now) / 60)
+    if minutes <= 0 { return "expired" }
+    let (days, hours) = (minutes / 1440, minutes / 60)
+    if days >= 2 { return "\(days)d left" }
+    if days == 1 { return "1d \(hours - 24)h left" }
+    if hours >= 2 { return "\(hours)h left" }
+    if hours == 1 { return "1h \(minutes - 60)m left" }
+    return "\(minutes)m left"
+}

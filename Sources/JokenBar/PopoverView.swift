@@ -90,32 +90,32 @@ private struct UsageDetails: View {
 
     var body: some View {
         let now = Date()
-        let includedActive = snapshot.activeIncluded(now: now) != nil
         VStack(alignment: .leading, spacing: 10) {
             ForEach(snapshot.dollarWindows, id: \.key) { window in
                 GaugeRow(
-                    title: "Included usage",
+                    title: "Included",
                     used: 1 - window.remainingFraction,
-                    value: "\(Fmt.usd(window.used)) / \(Fmt.usd(window.limit, decimals: 0)) used",
-                    footnote: window.resetsAt.map { "expires \(Fmt.day($0))" }
+                    footnote: window.resetsAt.map { "expires \(Fmt.day($0)) · \(timeLeft(until: $0, now: now))" },
+                    total: window.limit
                 )
             }
             if let budget = snapshot.monthlyBudget, budget.enabled {
                 let reset = nextMonthlyReset(after: now)
                 GaugeRow(
-                    title: "Monthly limit",
+                    title: "Monthly",
                     used: 1 - budget.remainingFraction,
-                    value: "\(Fmt.usd(budget.used)) / \(Fmt.usd(budget.limit, decimals: 0)) used",
-                    footnote: (includedActive ? "Untouched while included usage lasts · " : "")
-                        + "resets ≈ \(Fmt.day(reset)) · \(Fmt.relative(reset, now: now))"
+                    footnote: "resets ≈ \(Fmt.day(reset)) · \(timeLeft(until: reset, now: now))",
+                    total: budget.limit
                 )
             }
             ForEach(snapshot.percentLimits, id: \.kind) { limit in
                 GaugeRow(
                     title: Fmt.limitTitle(limit.kind),
                     used: limit.percent / 100,
-                    value: "\(Int(limit.percent.rounded()))% used",
-                    footnote: limit.resetsAt.map { "resets \(Fmt.date($0)) · \(Fmt.relative($0, now: now))" }
+                    footnote: limit.resetsAt.map { reset in
+                        let when = limit.kind == "session" ? Fmt.time(reset) : Fmt.date(reset)
+                        return "resets \(when) · \(timeLeft(until: reset, now: now))"
+                    }
                 )
             }
             ForEach(snapshot.resetGrants.filter { ($0.resetsLeft ?? 0) > 0 }) { grant in
@@ -136,20 +136,27 @@ private struct GaugeRow: View {
     let title: String
     /// 0…1, fills from the left like the bars on claude.ai's usage page.
     let used: Double
-    let value: String
     let footnote: String?
+    /// Dollar limit, shown as "Total $200"; nil for percent-only limits.
+    var total: Double?
 
     var body: some View {
         VStack(alignment: .leading, spacing: 3) {
             HStack {
                 Text(title).font(.subheadline.weight(.medium))
                 Spacer()
-                Text(value).font(.subheadline.monospacedDigit()).foregroundStyle(.secondary)
+                Text("\(Int((used * 100).rounded()))% used")
+                    .font(.subheadline.monospacedDigit())
+                    .foregroundStyle(.secondary)
             }
             UsageBar(used: used)
-            if let footnote {
-                Text(footnote).font(.caption).foregroundStyle(.secondary)
+            HStack {
+                if let footnote { Text(footnote) }
+                Spacer()
+                if let total { Text("Total \(Fmt.usd(total, decimals: 0))") }
             }
+            .font(.caption.monospacedDigit())
+            .foregroundStyle(.secondary)
         }
     }
 }
@@ -295,20 +302,14 @@ enum Fmt {
         date.formatted(.dateTime.month(.abbreviated).day())
     }
 
-    static func relative(_ date: Date, now: Date) -> String {
-        let seconds = date.timeIntervalSince(now)
-        if seconds <= 0 { return "expired" }
-        let days = Int(seconds / 86_400)
-        if days >= 1 { return "\(days)d left" }
-        let hours = Int(seconds / 3_600)
-        if hours >= 1 { return "\(hours)h left" }
-        return "\(max(1, Int(seconds / 60)))m left"
+    static func time(_ date: Date) -> String {
+        date.formatted(.dateTime.hour().minute())
     }
 
     static func limitTitle(_ kind: String) -> String {
         switch kind {
-        case "session": return "5-hour limit"
-        case "weekly_all": return "Weekly limit"
+        case "session": return "Session"
+        case "weekly_all": return "Week"
         default: return kind
         }
     }
