@@ -106,6 +106,24 @@ public struct Organization: Codable, Equatable, Hashable, Identifiable {
 
     public var hasClaudeAI: Bool { capabilities?.contains("chat") ?? true }
 
+    /// Personal orgs are named "<email>'s Organization"; show "Claude Pro · <email>" instead.
+    public var displayName: String {
+        guard let plan = personalPlan else { return name }
+        let owner = ["'s Organization", "’s Organization"]
+            .first { name.hasSuffix($0) }
+            .map { String(name.dropLast($0.count)) } ?? name
+        return "\(plan) · \(owner)"
+    }
+
+    /// nil for Team/Enterprise ("raven") and API-only orgs.
+    var personalPlan: String? {
+        let capabilities = capabilities ?? []
+        guard capabilities.contains("chat"), !capabilities.contains("raven") else { return nil }
+        if capabilities.contains("claude_max") { return "Claude Max" }
+        if capabilities.contains("claude_pro") { return "Claude Pro" }
+        return "Claude Free"
+    }
+
     /// Parses `GET /api/organizations`, keeping only orgs with a claude.ai usage page.
     public static func parseList(_ data: Data) throws -> [Organization] {
         try ClaudeJSON.decoder.decode([Organization].self, from: data).filter(\.hasClaudeAI)

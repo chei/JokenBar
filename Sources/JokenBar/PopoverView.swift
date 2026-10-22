@@ -39,7 +39,7 @@ private struct OrgCard: View {
         } else {
             VStack(alignment: .leading, spacing: 8) {
                 HStack {
-                    Text(org.name).font(.headline).lineLimit(1)
+                    Text(org.displayName).font(.headline).lineLimit(1)
                     Spacer()
                     Button {
                         model.primaryOrgID = org.uuid

@@ -79,8 +79,18 @@ struct UsageSnapshotTests {
 
     @Test func organizationsKeepOnlyClaudeAIOrgs() throws {
         let orgs = try Organization.parseList(fixture("organizations"))
-        #expect(orgs.map(\.uuid) == ["org-enterprise"])
+        #expect(orgs.map(\.uuid) == ["org-enterprise", "org-personal"])
         #expect(orgs.first?.name == "Example Org")
+    }
+
+    @Test func displayNameShowsPlanAndEmailForPersonalOrgs() throws {
+        let orgs = try Organization.parseList(fixture("organizations"))
+        #expect(orgs.map(\.displayName) == ["Example Org", "Claude Pro · user@example.com"])
+
+        let max = Organization(uuid: "x", name: "user@example.com’s Organization", capabilities: ["chat", "claude_max"])
+        #expect(max.displayName == "Claude Max · user@example.com")
+        let free = Organization(uuid: "x", name: "Renamed", capabilities: ["chat"])
+        #expect(free.displayName == "Claude Free · Renamed")
     }
 
     @Test func levelThresholds() {
