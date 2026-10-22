@@ -4,7 +4,7 @@ Tiny macOS menu bar app showing Claude / Claude Code usage limits.
 
 ## Principles
 - Keep it minimal: no notifications, no extra settings, no Dock icon.
-- No references to any specific company, person or non-English language in code, docs or test fixtures. Fixtures use generic values (Example Org, example.com, $1000 included, $150 monthly).
+- Everything committed (code, comments, docs, commit messages, fixtures) is in English, with no references to any specific company or person. Fixtures use generic values (Example Org, example.com, $1000 included, $150 monthly).
 - Public repo, MIT license, copyright "chei".
 
 ## Architecture
