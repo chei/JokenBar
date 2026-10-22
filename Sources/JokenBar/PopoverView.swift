@@ -41,13 +41,15 @@ private struct OrgCard: View {
                 HStack {
                     Text(org.displayName).font(.headline).lineLimit(1)
                     Spacer()
-                    Button {
-                        model.primaryOrgID = org.uuid
-                    } label: {
-                        Image(systemName: isPrimary ? "menubar.arrow.up.rectangle" : "menubar.rectangle")
+                    if model.visibleOrgs.count > 1 {
+                        Button {
+                            model.primaryOrgID = org.uuid
+                        } label: {
+                            Image(systemName: isFavorite ? "star.fill" : "star")
+                        }
+                        .buttonStyle(.borderless)
+                        .help(isFavorite ? "Shown in menu bar" : "Show in menu bar")
                     }
-                    .buttonStyle(.borderless)
-                    .help("Show in menu bar")
                     Menu {
                         Button("Sign In Again…") { model.login(account) }
                         Button("Remove Account", role: .destructive) { model.remove(account) }
@@ -65,7 +67,7 @@ private struct OrgCard: View {
         }
     }
 
-    private var isPrimary: Bool { model.primaryOrgID == org.uuid }
+    private var isFavorite: Bool { model.favoriteOrgID == org.uuid }
 
     @ViewBuilder private var content: some View {
         switch model.states[org.uuid] {

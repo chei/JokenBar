@@ -45,9 +45,24 @@ final class AppModel: ObservableObject {
 
     // MARK: Menu bar
 
-    /// The org shown in the menu bar: the starred one, else the first that loaded.
+    /// Orgs that get a card in the popover.
+    var visibleOrgs: [Organization] {
+        accounts.flatMap(\.organizations).filter {
+            if case .unavailable? = states[$0.uuid] { return false }
+            return true
+        }
+    }
+
+    /// The starred org; defaults to the first one.
+    var favoriteOrgID: String? {
+        let orgs = visibleOrgs
+        if let id = primaryOrgID, orgs.contains(where: { $0.uuid == id }) { return id }
+        return orgs.first?.uuid
+    }
+
+    /// The org shown in the menu bar: the favorite, else the first that loaded.
     var menuBarSnapshot: UsageSnapshot? {
-        if let id = primaryOrgID, case .loaded(let snapshot)? = states[id] { return snapshot }
+        if let id = favoriteOrgID, case .loaded(let snapshot)? = states[id] { return snapshot }
         for account in accounts {
             for org in account.organizations {
                 if case .loaded(let snapshot)? = states[org.uuid] { return snapshot }
