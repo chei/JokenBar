@@ -63,8 +63,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         updateStatusItem()
         if model.accounts.isEmpty {
             DispatchQueue.main.async { self.togglePopover() }
-        } else {
-            Task { await model.refreshAll() }
+        }
+        Task {
+            await model.removeOrphanedDataStores()
+            await model.refreshAll()
         }
     }
 

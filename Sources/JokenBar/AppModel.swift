@@ -147,6 +147,18 @@ final class AppModel: ObservableObject {
         Task { try? await WKWebsiteDataStore.remove(forIdentifier: account.id) }
     }
 
+    /// Deletes cookie stores no account refers to, e.g. when removing an account
+    /// failed because its web view still held the store. Run before any session exists.
+    func removeOrphanedDataStores() async {
+        let known = Set(accounts.map(\.id))
+        // Listing stores before any other WebKit object exists crashes inside WebKit
+        // (its main run loop isn't set up yet); creating a throwaway store does that.
+        _ = WKWebsiteDataStore.nonPersistent()
+        for id in await WKWebsiteDataStore.allDataStoreIdentifiers where !known.contains(id) {
+            try? await WKWebsiteDataStore.remove(forIdentifier: id)
+        }
+    }
+
     private func updateOrganizations(_ orgs: [Organization], for accountID: UUID) {
         guard let index = accounts.firstIndex(where: { $0.id == accountID }),
               accounts[index].organizations != orgs
