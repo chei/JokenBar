@@ -31,17 +31,9 @@ public enum Headline: Equatable {
 
     public var level: Level? { remainingFraction.map(Level.init(remainingFraction:)) }
 
-    /// Compact menu bar text: used dollars, or used percent for Pro/Max.
+    /// Compact menu bar text: always the used percentage.
     public var shortText: String {
-        switch self {
-        case .included(let w): return Self.compactUSD(w.used)
-        case .monthly(let b): return Self.compactUSD(b.used)
-        case .percent(let p): return "\(Int(p.percent.rounded()))%"
-        case .unknown: return "–"
-        }
-    }
-
-    static func compactUSD(_ value: Double) -> String {
-        value >= 10_000 ? "$\(Int(value / 1000))k" : "$\(Int(value.rounded(.down)))"
+        guard let remainingFraction else { return "–" }
+        return "\(Int(((1 - remainingFraction) * 100).rounded()))%"
     }
 }
