@@ -18,7 +18,7 @@ enum JokenBarMain {
 }
 
 @MainActor
-final class AppDelegate: NSObject, NSApplicationDelegate {
+final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     private let model = AppModel()
     private let popover = NSPopover()
     private var statusItem: NSStatusItem!
@@ -31,16 +31,13 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         statusItem.button?.target = self
-        statusItem.button?.action = #selector(statusItemClicked)
-        statusItem.button?.sendAction(on: [.leftMouseUp, .rightMouseUp])
+        statusItem.button?.action = #selector(togglePopover)
 
-        let popoverView = PopoverView { [weak self] in
-            self?.makeMenu().popUp(positioning: nil, at: NSEvent.mouseLocation, in: nil)
-        }
-        let hosting = NSHostingController(rootView: popoverView.environmentObject(model))
+        let hosting = NSHostingController(rootView: PopoverView().environmentObject(model))
         hosting.sizingOptions = [.preferredContentSize]
         popover.contentViewController = hosting
         popover.behavior = .transient
+        popover.delegate = self
 
         model.objectWillChange
             .sink { [weak self] _ in
@@ -69,18 +66,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         }
     }
 
-    @objc private func statusItemClicked() {
-        if NSApp.currentEvent?.type == .rightMouseUp {
-            // Attaching the menu only for this click keeps left-click for the popover.
-            popover.performClose(nil)
-            statusItem.menu = makeMenu()
-            statusItem.button?.performClick(nil)
-            statusItem.menu = nil
-        } else {
-            togglePopover()
-        }
-    }
-
     @objc private func togglePopover() {
         if popover.isShown {
             popover.performClose(nil)
@@ -89,6 +74,10 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             popover.show(relativeTo: button.bounds, of: button, preferredEdge: .minY)
             Task { await model.refreshIfStale() }
         }
+    }
+
+    func popoverDidClose(_ notification: Notification) {
+        model.settingsExpanded = false
     }
 
     private func updateHotKey() {
@@ -101,31 +90,6 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             }
         }
     }
-
-    // MARK: Menu (gear button and right-click)
-
-    private func makeMenu() -> NSMenu {
-        let menu = NSMenu()
-        menu.addItem(item("Add Account…", #selector(addAccount)))
-        menu.addItem(.separator())
-        menu.addItem(item("Launch at Login", #selector(toggleLaunchAtLogin), on: model.launchAtLogin))
-        menu.addItem(item("Global Shortcut ⌃⌥J", #selector(toggleHotKey), on: model.hotKeyEnabled))
-        menu.addItem(.separator())
-        menu.addItem(item("Quit JokenBar", #selector(quit), key: "q"))
-        return menu
-    }
-
-    private func item(_ title: String, _ action: Selector, on: Bool = false, key: String = "") -> NSMenuItem {
-        let item = NSMenuItem(title: title, action: action, keyEquivalent: key)
-        item.target = self
-        item.state = on ? .on : .off
-        return item
-    }
-
-    @objc private func addAccount() { model.login() }
-    @objc private func toggleLaunchAtLogin() { model.launchAtLogin.toggle() }
-    @objc private func toggleHotKey() { model.hotKeyEnabled.toggle() }
-    @objc private func quit() { NSApp.terminate(nil) }
 
     private func updateStatusItem() {
         guard let button = statusItem?.button else { return }

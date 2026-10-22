@@ -3,7 +3,6 @@ import SwiftUI
 
 struct PopoverView: View {
     @EnvironmentObject private var model: AppModel
-    let showMenu: () -> Void
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
@@ -13,8 +12,6 @@ struct PopoverView: View {
                     Text("Track your Claude usage limits. You can add both work and personal accounts.")
                         .font(.callout)
                         .foregroundStyle(.secondary)
-                    Button("Add Account…") { model.login() }
-                        .buttonStyle(.borderedProminent)
                 }
             } else {
                 ForEach(model.accounts) { account in
@@ -24,7 +21,11 @@ struct PopoverView: View {
                 }
             }
             Divider()
-            FooterView(showMenu: showMenu)
+            FooterView()
+            if model.settingsExpanded || model.accounts.isEmpty {
+                Divider()
+                SettingsView()
+            }
         }
         .padding(14)
         .frame(width: 340)
@@ -170,7 +171,6 @@ private struct UsageBar: View {
 
 private struct FooterView: View {
     @EnvironmentObject private var model: AppModel
-    let showMenu: () -> Void
 
     var body: some View {
         HStack {
@@ -188,11 +188,51 @@ private struct FooterView: View {
             .disabled(model.isRefreshing)
             .help("Refresh")
             Spacer()
-            Button(action: showMenu) {
-                Image(systemName: "gearshape")
+            if !model.accounts.isEmpty {
+                Button {
+                    model.settingsExpanded.toggle()
+                } label: {
+                    Image(systemName: model.settingsExpanded ? "gearshape.fill" : "gearshape")
+                }
+                .buttonStyle(.borderless)
+                .help("Settings")
             }
-            .buttonStyle(.borderless)
-            .help("Settings")
+        }
+    }
+}
+
+private struct SettingsView: View {
+    @EnvironmentObject private var model: AppModel
+
+    var body: some View {
+        VStack(alignment: .leading, spacing: 8) {
+            SwitchRow(title: "Launch at login", isOn: Binding(
+                get: { model.launchAtLogin },
+                set: { model.launchAtLogin = $0 }
+            ))
+            SwitchRow(title: "Global shortcut ⌃⌥J", isOn: $model.hotKeyEnabled)
+            HStack {
+                Button("Add Account…") { model.login() }
+                    .buttonStyle(.borderedProminent)
+                Spacer()
+                Button("Quit JokenBar") { NSApp.terminate(nil) }
+            }
+        }
+    }
+}
+
+private struct SwitchRow: View {
+    let title: String
+    @Binding var isOn: Bool
+
+    var body: some View {
+        HStack {
+            Text(title)
+            Spacer()
+            Toggle(title, isOn: $isOn)
+                .labelsHidden()
+                .toggleStyle(.switch)
+                .controlSize(.small)
         }
     }
 }

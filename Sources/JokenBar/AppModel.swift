@@ -26,6 +26,8 @@ final class AppModel: ObservableObject {
     @Published var primaryOrgID: String? {
         didSet { UserDefaults.standard.set(primaryOrgID, forKey: Keys.primaryOrg) }
     }
+    /// The popover's settings section; collapses whenever the popover closes.
+    @Published var settingsExpanded = false
     @Published var hotKeyEnabled: Bool {
         didSet { UserDefaults.standard.set(hotKeyEnabled, forKey: Keys.hotKeyEnabled) }
     }
