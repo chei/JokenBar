@@ -54,13 +54,6 @@ private struct OrgCard: View {
                     }
                     Text(org.displayName).font(.headline).lineLimit(1)
                     Spacer()
-                    Button {
-                        model.remove(account)
-                    } label: {
-                        Image(systemName: "trash")
-                    }
-                    .buttonStyle(.borderless)
-                    .help("Remove account")
                 }
                 content
             }
@@ -218,6 +211,22 @@ private struct SettingsView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 4) {
+            ForEach(model.accounts) { account in
+                HStack {
+                    Text(account.organizations.map(\.displayName).joined(separator: ", "))
+                        .lineLimit(1)
+                        .truncationMode(.middle)
+                    Spacer()
+                    Button {
+                        model.remove(account)
+                    } label: {
+                        Image(systemName: "trash")
+                    }
+                    .buttonStyle(.borderless)
+                    .help("Remove account")
+                }
+                .padding(.horizontal, 6)
+            }
             MenuRow(title: "Add Account…") { model.login() }
             Divider()
             SwitchRow(title: "Launch at Login", isOn: Binding(
