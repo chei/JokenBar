@@ -265,7 +265,8 @@ private struct SettingsView: View {
                     .keyboardShortcut("q")
             }
         }
-        .padding(.horizontal, 6)
+        // Lines up with the "Settings" row's text; without accounts there is no such row.
+        .padding(.horizontal, model.accounts.isEmpty ? 0 : 6)
     }
 }
 
