@@ -42,8 +42,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
             .sink { [weak self] _ in DispatchQueue.main.async { self?.updateStatusItem() } }
             .store(in: &cancellables)
 
-        // ⌃⌥U: ⌘U would steal "underline" from every other app.
-        hotKey = HotKey(keyCode: kVK_ANSI_U, modifiers: controlKey | optionKey) { [weak self] in
+        // ⌃⌥J: a plain ⌘ shortcut would be stolen from every other app.
+        hotKey = HotKey(keyCode: kVK_ANSI_J, modifiers: controlKey | optionKey) { [weak self] in
             DispatchQueue.main.async { self?.togglePopover() }
         }
 
@@ -95,7 +95,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
         button.image = image
         button.imagePosition = .imageLeading
         button.title = headline != .unknown ? " " + headline.shortText : ""
-        button.toolTip = "JokenBar – ⌃⌥U"
+        button.toolTip = "JokenBar – ⌃⌥J"
     }
 }
 

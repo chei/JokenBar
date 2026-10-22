@@ -16,7 +16,7 @@ bar. No Dock icon, no system permissions, one request to claude.ai every
 
 Color: 🟢 plenty left · 🟠 running low · 🔴 almost gone.
 
-Click it (or press **⌃⌥U**) for details: included usage and its expiry, monthly
+Click it (or press **⌃⌥J**) for details: included usage and its expiry, monthly
 limit and reset, Pro/Max weekly limit, several accounts at once.
 
 ## Install

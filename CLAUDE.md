@@ -9,7 +9,7 @@ Tiny macOS menu bar app showing Claude / Claude Code usage limits.
 
 ## Architecture
 - `Sources/QuotaCore`: Foundation-only parsing and display logic, unit tested with swift-testing (`scripts/test.sh`; plain `swift test` needs Xcode).
-- `Sources/JokenBar`: AppKit `NSStatusItem` + `NSPopover` with SwiftUI, Carbon global hotkey ⌃⌥U (no Accessibility permission), `WKWebView` sign-in.
+- `Sources/JokenBar`: AppKit `NSStatusItem` + `NSPopover` with SwiftUI, Carbon global hotkey ⌃⌥J (no Accessibility permission), `WKWebView` sign-in.
 - Each account has its own `WKWebsiteDataStore(forIdentifier:)`. Requests run as `fetch` inside an invisible web view on claude.ai, so WebKit handles cookies, SSO and Cloudflare; a Safari user agent keeps Google sign-in working. The app stores no tokens or cookies.
 
 ## Data source (undocumented claude.ai endpoints)
