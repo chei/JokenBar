@@ -7,13 +7,11 @@ struct PopoverView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 10) {
+            Text("JokenBar").font(.headline)
             if model.accounts.isEmpty {
-                VStack(alignment: .leading, spacing: 8) {
-                    Text("JokenBar").font(.headline)
-                    Text("See your Claude usage limits at a glance.")
-                        .font(.callout)
-                        .foregroundStyle(.secondary)
-                }
+                Text("See your Claude usage limits at a glance.")
+                    .font(.callout)
+                    .foregroundStyle(.secondary)
             } else {
                 ForEach(model.accounts) { account in
                     ForEach(account.organizations) { org in
