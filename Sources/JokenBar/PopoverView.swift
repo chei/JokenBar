@@ -91,7 +91,7 @@ private struct UsageDetails: View {
             ForEach(snapshot.dollarWindows, id: \.key) { window in
                 GaugeRow(
                     title: "Included usage",
-                    fraction: window.remainingFraction,
+                    used: 1 - window.remainingFraction,
                     value: "\(Fmt.usd(window.remaining)) left of \(Fmt.usd(window.limit, decimals: 0))",
                     footnote: window.resetsAt.map { "expires \(Fmt.date($0)) · \(Fmt.relative($0, now: now))" }
                 )
@@ -100,7 +100,7 @@ private struct UsageDetails: View {
                 let reset = nextMonthlyReset(after: now)
                 GaugeRow(
                     title: "Monthly limit",
-                    fraction: budget.remainingFraction,
+                    used: 1 - budget.remainingFraction,
                     value: "\(Fmt.usd(budget.used)) / \(Fmt.usd(budget.limit, decimals: 0)) spent",
                     footnote: (includedActive ? "Untouched while included usage lasts · " : "")
                         + "resets ≈ \(Fmt.day(reset)) · \(Fmt.relative(reset, now: now))"
@@ -109,7 +109,7 @@ private struct UsageDetails: View {
             ForEach(snapshot.percentLimits, id: \.kind) { limit in
                 GaugeRow(
                     title: Fmt.limitTitle(limit.kind),
-                    fraction: max(0, 1 - limit.percent / 100),
+                    used: limit.percent / 100,
                     value: "\(Int(limit.percent.rounded()))% used",
                     footnote: limit.resetsAt.map { "resets \(Fmt.date($0)) · \(Fmt.relative($0, now: now))" }
                 )
@@ -130,7 +130,8 @@ private struct UsageDetails: View {
 
 private struct GaugeRow: View {
     let title: String
-    let fraction: Double
+    /// 0…1, fills from the left like the bars on claude.ai's usage page.
+    let used: Double
     let value: String
     let footnote: String?
 
@@ -141,12 +142,26 @@ private struct GaugeRow: View {
                 Spacer()
                 Text(value).font(.subheadline.monospacedDigit()).foregroundStyle(.secondary)
             }
-            ProgressView(value: fraction)
-                .tint(Color(nsColor: Level(remainingFraction: fraction).color))
+            UsageBar(used: used)
             if let footnote {
                 Text(footnote).font(.caption).foregroundStyle(.secondary)
             }
         }
+    }
+}
+
+private struct UsageBar: View {
+    let used: Double
+
+    var body: some View {
+        GeometryReader { geometry in
+            ZStack(alignment: .leading) {
+                Capsule().fill(Color.primary.opacity(0.12))
+                Capsule().fill(Color.blue)
+                    .frame(width: geometry.size.width * min(max(used, 0), 1))
+            }
+        }
+        .frame(height: 5)
     }
 }
 
