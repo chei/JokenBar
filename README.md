@@ -62,7 +62,7 @@ scripts/build-app.sh && cp -R dist/JokenBar.app /Applications/ && open /Applicat
    code). The window closes by itself once you're in.
 3. Personal account too? ⚙ → **Add Account…** → sign in again. Star the account
    to show in the menu bar (the first one by default).
-4. Optionally ⚙ → **Launch at login**. The ⚙ section can also turn off the
+4. Optionally ⚙ → **Launch at Login**. The ⚙ section can also turn off the
    ⌃⌥J shortcut.
 
 ## Security and privacy

@@ -205,35 +205,66 @@ private struct SettingsView: View {
     @EnvironmentObject private var model: AppModel
 
     var body: some View {
-        VStack(alignment: .leading, spacing: 8) {
-            SwitchRow(title: "Launch at login", isOn: Binding(
+        VStack(alignment: .leading, spacing: 4) {
+            MenuRow(title: "Add Account…") { model.login() }
+            Divider()
+            SwitchRow(title: "Launch at Login", isOn: Binding(
                 get: { model.launchAtLogin },
                 set: { model.launchAtLogin = $0 }
             ))
-            SwitchRow(title: "Global shortcut ⌃⌥J", isOn: $model.hotKeyEnabled)
-            HStack {
-                Button("Add Account…") { model.login() }
-                    .buttonStyle(.borderedProminent)
-                Spacer()
-                Button("Quit JokenBar") { NSApp.terminate(nil) }
-            }
+            SwitchRow(title: "Global Shortcut", shortcut: "⌃⌥J", isOn: $model.hotKeyEnabled)
+            Divider()
+            MenuRow(title: "Quit JokenBar", shortcut: "⌘Q") { NSApp.terminate(nil) }
+                .keyboardShortcut("q")
         }
+    }
+}
+
+/// A plain, menu-like row that highlights on hover.
+private struct MenuRow: View {
+    let title: String
+    var shortcut: String?
+    let action: () -> Void
+    @State private var isHovered = false
+
+    var body: some View {
+        Button(action: action) {
+            HStack {
+                Text(title)
+                Spacer()
+                if let shortcut {
+                    Text(shortcut).foregroundStyle(isHovered ? Color.white : Color.secondary)
+                }
+            }
+            .padding(.horizontal, 6)
+            .padding(.vertical, 3)
+            .foregroundStyle(isHovered ? Color.white : Color.primary)
+            .background(isHovered ? Color.accentColor : .clear, in: RoundedRectangle(cornerRadius: 4))
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .onHover { isHovered = $0 }
     }
 }
 
 private struct SwitchRow: View {
     let title: String
+    var shortcut: String?
     @Binding var isOn: Bool
 
     var body: some View {
         HStack {
             Text(title)
             Spacer()
+            if let shortcut {
+                Text(shortcut).foregroundStyle(.secondary)
+            }
             Toggle(title, isOn: $isOn)
                 .labelsHidden()
                 .toggleStyle(.switch)
-                .controlSize(.small)
+                .controlSize(.mini)
         }
+        .padding(.horizontal, 6)
     }
 }
 
