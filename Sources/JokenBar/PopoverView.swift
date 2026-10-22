@@ -97,7 +97,7 @@ private struct UsageDetails: View {
                     title: "Included usage",
                     used: 1 - window.remainingFraction,
                     value: "\(Fmt.usd(window.remaining)) left of \(Fmt.usd(window.limit, decimals: 0))",
-                    footnote: window.resetsAt.map { "expires \(Fmt.date($0)) · \(Fmt.relative($0, now: now))" }
+                    footnote: window.resetsAt.map { "expires \(Fmt.day($0))" }
                 )
             }
             if let budget = snapshot.monthlyBudget, budget.enabled {
