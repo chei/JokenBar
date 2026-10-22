@@ -83,14 +83,12 @@ struct UsageSnapshotTests {
         #expect(orgs.first?.name == "Example Org")
     }
 
-    @Test func displayNameShowsPlanAndEmailForPersonalOrgs() throws {
+    @Test func displayNameShowsEmailForPersonalOrgs() throws {
         let orgs = try Organization.parseList(fixture("organizations"))
-        #expect(orgs.map(\.displayName) == ["Example Org", "Claude Pro · user@example.com"])
+        #expect(orgs.map(\.displayName) == ["Example Org", "user@example.com"])
 
-        let max = Organization(uuid: "x", name: "user@example.com’s Organization", capabilities: ["chat", "claude_max"])
-        #expect(max.displayName == "Claude Max · user@example.com")
-        let free = Organization(uuid: "x", name: "Renamed", capabilities: ["chat"])
-        #expect(free.displayName == "Claude Free · Renamed")
+        let curly = Organization(uuid: "x", name: "user@example.com’s Organization")
+        #expect(curly.displayName == "user@example.com")
     }
 
     @Test func levelThresholds() {
