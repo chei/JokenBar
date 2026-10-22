@@ -241,8 +241,15 @@ private struct SettingsView: View {
                         .padding(.horizontal, 6)
                 }
             }
-            Button("Add Account…") { model.login() }
-                .padding(.horizontal, 6)
+            // The only sensible step without accounts, so prominent then.
+            if model.accounts.isEmpty {
+                Button("Add Account…") { model.login() }
+                    .buttonStyle(.borderedProminent)
+                    .padding(.horizontal, 6)
+            } else {
+                Button("Add Account…") { model.login() }
+                    .padding(.horizontal, 6)
+            }
             Divider()
             SwitchRow(title: "Launch at Login", isOn: Binding(
                 get: { model.launchAtLogin },
