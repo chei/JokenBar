@@ -21,7 +21,7 @@ final class LoginWindowController: NSWindowController, NSWindowDelegate {
         webView.customUserAgent = safariUserAgent
 
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 480, height: 700),
+            contentRect: NSRect(x: 0, y: 0, width: 560, height: 780),
             styleMask: [.titled, .closable, .resizable],
             backing: .buffered,
             defer: false
