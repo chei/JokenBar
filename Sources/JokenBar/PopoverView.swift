@@ -29,6 +29,7 @@ struct PopoverView: View {
         }
         .padding(14)
         .frame(width: 340)
+        .focusEffectDisabled()
     }
 }
 
@@ -226,6 +227,9 @@ private struct MenuRow: View {
     var shortcut: String?
     let action: () -> Void
     @State private var isHovered = false
+    /// Expanding the section can lay a row out under a still mouse, which AppKit
+    /// reports as hover; only highlight once the mouse has actually moved.
+    @State private var mouseAtAppear: NSPoint?
 
     var body: some View {
         Button(action: action) {
@@ -243,7 +247,13 @@ private struct MenuRow: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .onHover { isHovered = $0 }
+        .onAppear { mouseAtAppear = NSEvent.mouseLocation }
+        .onContinuousHover { phase in
+            switch phase {
+            case .active: isHovered = NSEvent.mouseLocation != mouseAtAppear
+            case .ended: isHovered = false
+            }
+        }
     }
 }
 
