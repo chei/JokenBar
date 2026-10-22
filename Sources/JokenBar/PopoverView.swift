@@ -289,12 +289,12 @@ private struct MenuRow<Trailing: View>: View {
             HStack {
                 Text(title)
                 Spacer()
-                trailing.foregroundStyle(isHovered ? Color.white : Color.secondary)
+                trailing.foregroundStyle(.secondary)
             }
             .padding(.horizontal, 6)
             .padding(.vertical, 3)
-            .foregroundStyle(isHovered ? Color.white : Color.primary)
-            .background(isHovered ? Color.accentColor : .clear, in: RoundedRectangle(cornerRadius: 4))
+            // Faint grey like the rows in the Wi-Fi menu, not a blue menu selection.
+            .background(isHovered ? Color.primary.opacity(0.1) : .clear, in: RoundedRectangle(cornerRadius: 4))
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
