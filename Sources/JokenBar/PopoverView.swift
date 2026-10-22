@@ -228,7 +228,8 @@ private struct SettingsView: View {
                         .padding(.horizontal, 6)
                 }
             }
-            MenuRow(title: "Add Account…") { model.login() }
+            Button("Add Account…") { model.login() }
+                .padding(.horizontal, 6)
             Divider()
             SwitchRow(title: "Launch at Login", isOn: Binding(
                 get: { model.launchAtLogin },
@@ -236,8 +237,12 @@ private struct SettingsView: View {
             ))
             SwitchRow(title: "Global Shortcut", shortcut: "⌃⌥J", isOn: $model.hotKeyEnabled)
             Divider()
-            MenuRow(title: "Quit JokenBar", shortcut: "⌘Q") { NSApp.terminate(nil) }
-                .keyboardShortcut("q")
+            HStack {
+                Spacer()
+                Button("Quit JokenBar") { NSApp.terminate(nil) }
+                    .keyboardShortcut("q")
+            }
+            .padding(.horizontal, 6)
         }
     }
 }
@@ -296,12 +301,6 @@ private struct MenuRow<Trailing: View>: View {
             case .ended: isHovered = false
             }
         }
-    }
-}
-
-extension MenuRow where Trailing == Text? {
-    init(title: String, shortcut: String? = nil, action: @escaping () -> Void) {
-        self.init(title: title, action: action) { shortcut.map { Text($0) } }
     }
 }
 
