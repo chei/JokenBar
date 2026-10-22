@@ -96,7 +96,7 @@ private struct UsageDetails: View {
                 GaugeRow(
                     title: "Included usage",
                     used: 1 - window.remainingFraction,
-                    value: "\(Fmt.usd(window.remaining)) left of \(Fmt.usd(window.limit, decimals: 0))",
+                    value: "\(Fmt.usd(window.used)) / \(Fmt.usd(window.limit, decimals: 0)) used",
                     footnote: window.resetsAt.map { "expires \(Fmt.day($0))" }
                 )
             }
@@ -105,7 +105,7 @@ private struct UsageDetails: View {
                 GaugeRow(
                     title: "Monthly limit",
                     used: 1 - budget.remainingFraction,
-                    value: "\(Fmt.usd(budget.used)) / \(Fmt.usd(budget.limit, decimals: 0)) spent",
+                    value: "\(Fmt.usd(budget.used)) / \(Fmt.usd(budget.limit, decimals: 0)) used",
                     footnote: (includedActive ? "Untouched while included usage lasts · " : "")
                         + "resets ≈ \(Fmt.day(reset)) · \(Fmt.relative(reset, now: now))"
                 )

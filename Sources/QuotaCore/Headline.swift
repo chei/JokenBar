@@ -31,11 +31,11 @@ public enum Headline: Equatable {
 
     public var level: Level? { remainingFraction.map(Level.init(remainingFraction:)) }
 
-    /// Compact menu bar text: remaining dollars, or used percent for Pro/Max.
+    /// Compact menu bar text: used dollars, or used percent for Pro/Max.
     public var shortText: String {
         switch self {
-        case .included(let w): return Self.compactUSD(w.remaining)
-        case .monthly(let b): return Self.compactUSD(b.remaining)
+        case .included(let w): return Self.compactUSD(w.used)
+        case .monthly(let b): return Self.compactUSD(b.used)
         case .percent(let p): return "\(Int(p.percent.rounded()))%"
         case .unknown: return "–"
         }

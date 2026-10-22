@@ -24,7 +24,7 @@ struct UsageSnapshotTests {
 
         let headline = snapshot.headline(now: date("2026-10-19T12:00:00Z"))
         #expect(headline == .included(included))
-        #expect(headline.shortText == "$789")
+        #expect(headline.shortText == "$210")
         #expect(headline.level == .ok)
     }
 
@@ -32,7 +32,7 @@ struct UsageSnapshotTests {
         let snapshot = try UsageSnapshot.parse(fixture("enterprise_usage"))
         let headline = snapshot.headline(now: date("2026-11-16T12:00:00Z"))
         #expect(headline == .monthly(MonthlyBudget(used: 0, limit: 150, enabled: true)))
-        #expect(headline.shortText == "$150")
+        #expect(headline.shortText == "$0")
     }
 
     @Test func extraUsageFallbackWhenSpendMissing() throws {

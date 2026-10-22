@@ -1,6 +1,6 @@
 # JokenBar
 
-**How much of your Claude usage is left? One glance at the menu bar.**
+**How much of your Claude usage have you used? One glance at the menu bar.**
 
 A tiny macOS app (~2 MB) that shows your Claude / Claude Code usage in the menu
 bar. No Dock icon, no system permissions, one request to claude.ai every
@@ -10,8 +10,8 @@ bar. No Dock icon, no system permissions, one request to claude.ai every
 
 | Menu bar | Meaning |
 |---|---|
-| 🎁 `$740` | work (Enterprise) account: what's left of the *Included usage* grant |
-| 💲 `$150` | work account: what's left of the monthly limit once included usage has expired |
+| 🎁 `$260` | work (Enterprise) account: *Included usage* grant used |
+| 💲 `$50` | work account: monthly limit used once included usage has expired |
 | ⏱ `34%` | personal Pro/Max account: 5-hour limit used |
 
 Color: 🟢 plenty left · 🟠 running low · 🔴 almost gone.
