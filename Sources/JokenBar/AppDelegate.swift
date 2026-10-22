@@ -32,7 +32,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     func applicationDidFinishLaunching(_ notification: Notification) {
         statusItem = NSStatusBar.system.statusItem(withLength: NSStatusItem.variableLength)
         statusItem.button?.target = self
-        statusItem.button?.action = #selector(togglePopover)
+        statusItem.button?.action = #selector(statusItemClicked)
+        statusItem.button?.sendAction(on: [.leftMouseUp, .rightMouseUp])
 
         let popoverView = PopoverView { [weak self] in self?.toggleSettings() }
         let hosting = NSHostingController(rootView: popoverView.environmentObject(model))
@@ -68,6 +69,17 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
             await model.removeOrphanedDataStores()
             await model.refreshAll()
         }
+    }
+
+    @objc private func statusItemClicked() {
+        guard NSApp.currentEvent?.type == .rightMouseUp else { return togglePopover() }
+        popover.performClose(nil)
+        let menu = NSMenu()
+        menu.addItem(NSMenuItem(title: "Quit JokenBar", action: #selector(NSApplication.terminate), keyEquivalent: "q"))
+        // Attached only for this click, so a left click still opens the popover.
+        statusItem.menu = menu
+        statusItem.button?.performClick(nil)
+        statusItem.menu = nil
     }
 
     @objc private func togglePopover() {

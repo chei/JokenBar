@@ -63,7 +63,7 @@ scripts/build-app.sh && cp -R dist/JokenBar.app /Applications/ && open /Applicat
 3. Personal account too? **Settings ›** → **Add Account…** → sign in again. The top
    account is shown in the menu bar; drag accounts under **Settings ›** to reorder.
 4. Optionally **Settings ›** → **Launch at Login**. Settings can also turn off the
-   ⌃⌥J shortcut.
+   ⌃⌥J hotkey. Right-click the menu bar icon to quit.
 
 ## Security and privacy
 
@@ -78,7 +78,7 @@ scripts/build-app.sh && cp -R dist/JokenBar.app /Applications/ && open /Applicat
 
 **Update:** run the install command again, or download the zip again.
 
-**Uninstall:** in the app, **Settings ›** → remove each account with its trash button, then **Quit JokenBar**, then:
+**Uninstall:** in the app, **Settings ›** → remove each account with its trash button, then right-click the menu bar icon → **Quit JokenBar**, then:
 
 ```sh
 rm -rf /Applications/JokenBar.app ~/Applications/JokenBar.app

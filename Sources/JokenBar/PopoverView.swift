@@ -256,13 +256,7 @@ private struct SettingsView: View {
                     get: { model.launchAtLogin },
                     set: { model.launchAtLogin = $0 }
                 ))
-                SwitchRow(title: "Global Shortcut", shortcut: "⌃⌥J", isOn: $model.hotKeyEnabled)
-            }
-            Divider()
-            HStack {
-                Spacer()
-                Button("Quit JokenBar") { NSApp.terminate(nil) }
-                    .keyboardShortcut("q")
+                SwitchRow(title: "Hotkey", shortcut: "⌃⌥J", isOn: $model.hotKeyEnabled)
             }
         }
         // Lines up with the "Settings" row's text; without accounts there is no such row.
