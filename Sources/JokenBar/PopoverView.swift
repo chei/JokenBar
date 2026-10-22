@@ -10,7 +10,7 @@ struct PopoverView: View {
             if model.accounts.isEmpty {
                 VStack(alignment: .leading, spacing: 8) {
                     Text("JokenBar").font(.headline)
-                    Text("Track your Claude usage limits. You can add both work and personal accounts.")
+                    Text("See your Claude usage limits at a glance.")
                         .font(.callout)
                         .foregroundStyle(.secondary)
                 }
