@@ -94,7 +94,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
 
         button.image = image
         button.imagePosition = .imageLeading
-        button.title = model.showNumber && headline != .unknown ? " " + headline.shortText : ""
+        button.title = headline != .unknown ? " " + headline.shortText : ""
         button.toolTip = "JokenBar – ⌃⌥U"
     }
 }

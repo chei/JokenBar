@@ -171,7 +171,6 @@ private struct FooterView: View {
     var body: some View {
         VStack(alignment: .leading, spacing: 8) {
             HStack(spacing: 12) {
-                Toggle("Show number", isOn: $model.showNumber)
                 Toggle("Launch at login", isOn: Binding(
                     get: { model.launchAtLogin },
                     set: { model.launchAtLogin = $0 }

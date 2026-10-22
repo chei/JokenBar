@@ -26,9 +26,6 @@ final class AppModel: ObservableObject {
     @Published var primaryOrgID: String? {
         didSet { UserDefaults.standard.set(primaryOrgID, forKey: Keys.primaryOrg) }
     }
-    @Published var showNumber: Bool {
-        didSet { UserDefaults.standard.set(showNumber, forKey: Keys.showNumber) }
-    }
 
     private var sessions: [UUID: ClaudeSession] = [:]
     private var loginWindow: LoginWindowController?
@@ -36,7 +33,6 @@ final class AppModel: ObservableObject {
     private enum Keys {
         static let accounts = "accounts"
         static let primaryOrg = "primaryOrgID"
-        static let showNumber = "showNumber"
     }
 
     init() {
@@ -45,7 +41,6 @@ final class AppModel: ObservableObject {
             .flatMap { try? JSONDecoder().decode([Account].self, from: $0) }
         _accounts = Published(initialValue: saved ?? [])
         _primaryOrgID = Published(initialValue: defaults.string(forKey: Keys.primaryOrg))
-        _showNumber = Published(initialValue: defaults.object(forKey: Keys.showNumber) as? Bool ?? true)
     }
 
     // MARK: Menu bar
