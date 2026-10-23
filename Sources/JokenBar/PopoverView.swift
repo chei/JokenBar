@@ -102,8 +102,8 @@ private struct UsageDetails: View {
                 GaugeRow(
                     title: "Monthly",
                     used: 1 - budget.remainingFraction,
-                    // The API returns no reset date; this is the end of the calendar month.
-                    footnote: "≈ \(timeLeft(until: reset, now: now))",
+                    // The API returns no reset date; assume midnight on the 1st.
+                    footnote: timeLeft(until: reset, now: now),
                     total: budget.limit
                 )
             }

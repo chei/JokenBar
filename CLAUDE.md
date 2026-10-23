@@ -16,7 +16,7 @@ Tiny macOS menu bar app showing Claude / Claude Code usage limits.
 - `GET /api/organizations` → `[{uuid, name, capabilities}]`; keep only orgs whose capabilities contain `"chat"`.
 - `GET /api/organizations/{uuid}/usage`:
   - Any top-level object with `limit_dollars`/`used_dollars`/`remaining_dollars` is a dollar allowance (currently `copper_kite` = Enterprise "Included usage"; `resets_at` = expiry). Detect by shape, never by key name: keys are rotating code names.
-  - `spend` (fallback `extra_usage`): monthly per-user spend limit in minor units (`amount_minor`, `exponent`). No reset date is returned; the app shows only the time left until the end of the calendar month ("≈ 8d left"). Weekly limits show the reset weekday, session limits only the time.
+  - `spend` (fallback `extra_usage`): monthly per-user spend limit in minor units (`amount_minor`, `exponent`). No reset date is returned; the app shows only the time left until midnight on the 1st ("8d left"). Weekly limits show the reset weekday, session limits only the time.
   - `limits[]` (fallback `five_hour`/`seven_day`): Pro/Max percent limits. Empty on Enterprise.
   - `cedar_ember.grants[]`: promotional usage-limit resets.
 - Menu bar headline priority: active included allowance → monthly limit → highest percent limit.
