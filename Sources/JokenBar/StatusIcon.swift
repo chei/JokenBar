@@ -1,8 +1,9 @@
 import AppKit
 import CoreText
 
-/// The fixed "JB" menu bar icon. Only the enclosed areas of the B change color
-/// with the usage level, so the shape never moves.
+/// The fixed "JB" menu bar icon. The letters sit close together and the B's serifs
+/// are extended back to the J, enclosing a slot between the stems; only that slot
+/// changes color with the usage level.
 enum StatusIcon {
     private static let font: CTFont = {
         let base = NSFont.systemFont(ofSize: 15, weight: .semibold)
@@ -11,10 +12,40 @@ enum StatusIcon {
     }()
 
     private static let baseline: CGFloat = 4.5
+    private static let capHeight = CTFontGetCapHeight(font)
     private static let letterJ = glyph("J", x: 1)
-    private static let letterB = glyph("B", x: 1 + glyph("J", x: 0).boundingBoxOfPath.maxX + 0.3)
-    /// The B with its counters filled: every contour filled on its own.
-    private static let silhouetteB = contours(of: letterB)
+    private static let originB = 1 + glyph("J", x: 0).boundingBoxOfPath.maxX - 0.75
+    private static let letterB = glyph("B", x: originB)
+
+    // Measured on the font's outlines: inner edges of the stems and the serif thickness.
+    private static let stemJ: CGFloat = 1 + 3.85
+    private static let stemB: CGFloat = originB + 1.7
+    private static let serif: CGFloat = 0.65
+    private static let bracket: CGFloat = 0.8
+
+    /// Every edge of the slot lies under ink, so no color bleeds when antialiased.
+    private static let slot = CGRect(x: stemJ - 0.5, y: baseline + 0.4,
+                                     width: stemB - stemJ + 0.8, height: capHeight - 0.8)
+
+    /// The extended serifs, plus a bracket rounding the slot's bottom-left corner
+    /// the way the font's own brackets round the other three.
+    private static let closure: CGPath = {
+        let path = CGMutablePath()
+        let left = stemJ - 0.5
+        path.addRect(CGRect(x: left - 0.8, y: baseline, width: stemB + 0.3 - left + 0.8, height: serif))
+        path.addRect(CGRect(x: left, y: baseline + capHeight - serif, width: stemB + 0.3 - left, height: serif))
+        // The J's stem narrows towards its curve; keep the slot's left edge straight.
+        path.addRect(CGRect(x: left, y: baseline, width: stemJ - left, height: capHeight / 2))
+        path.move(to: CGPoint(x: left, y: baseline))
+        path.addLine(to: CGPoint(x: stemJ + bracket, y: baseline))
+        path.addLine(to: CGPoint(x: stemJ + bracket, y: baseline + serif))
+        path.addArc(center: CGPoint(x: stemJ + bracket, y: baseline + serif + bracket), radius: bracket,
+                    startAngle: -.pi / 2, endAngle: .pi, clockwise: true)
+        path.addLine(to: CGPoint(x: left, y: baseline + serif + bracket))
+        path.closeSubpath()
+        return path
+    }()
+
     private static let size = NSSize(width: ceil(letterB.boundingBoxOfPath.maxX + 1), height: 18)
 
     /// Drawn on demand, so the label color follows the menu bar's light or dark appearance.
@@ -23,14 +54,15 @@ enum StatusIcon {
             guard let context = NSGraphicsContext.current?.cgContext else { return false }
             if let level {
                 context.setFillColor(level.cgColor)
-                for contour in silhouetteB {
-                    context.addPath(contour)
-                    context.fillPath()
-                }
+                context.fill(slot)
             }
+            context.setFillColor(NSColor.labelColor.cgColor)
             context.addPath(letterJ)
             context.addPath(letterB)
-            context.setFillColor(NSColor.labelColor.cgColor)
+            context.fillPath()
+            // Filled separately: where its contours overlap the glyphs' opposite
+            // winding, a single fill would punch holes.
+            context.addPath(closure)
             context.fillPath()
             return true
         }
@@ -49,26 +81,5 @@ enum StatusIcon {
             path.addPath(outline, transform: CGAffineTransform(translationX: x, y: baseline))
         }
         return path
-    }
-
-    private static func contours(of path: CGPath) -> [CGPath] {
-        var result: [CGPath] = []
-        var current = CGMutablePath()
-        path.applyWithBlock { element in
-            let points = element.pointee.points
-            switch element.pointee.type {
-            case .moveToPoint:
-                if !current.isEmpty { result.append(current) }
-                current = CGMutablePath()
-                current.move(to: points[0])
-            case .addLineToPoint: current.addLine(to: points[0])
-            case .addQuadCurveToPoint: current.addQuadCurve(to: points[1], control: points[0])
-            case .addCurveToPoint: current.addCurve(to: points[2], control1: points[0], control2: points[1])
-            case .closeSubpath: current.closeSubpath()
-            @unknown default: break
-            }
-        }
-        if !current.isEmpty { result.append(current) }
-        return result
     }
 }
