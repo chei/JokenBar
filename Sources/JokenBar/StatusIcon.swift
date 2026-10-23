@@ -13,12 +13,14 @@ enum StatusIcon {
 
     private static let baseline: CGFloat = 4.5
     private static let capHeight = CTFontGetCapHeight(font)
-    private static let letterJ = glyph("J", x: 1)
-    private static let originB = 1 + glyph("J", x: 0).boundingBoxOfPath.maxX - 0.75
+    /// The J's hook reaches left of its origin; shift it so the ink starts at the image edge.
+    private static let originJ = -glyph("J", x: 0).boundingBoxOfPath.minX
+    private static let letterJ = glyph("J", x: originJ)
+    private static let originB = letterJ.boundingBoxOfPath.maxX - 0.75
     private static let letterB = glyph("B", x: originB)
 
     // Measured on the font's outlines: inner edges of the stems and the serif thickness.
-    private static let stemJ: CGFloat = 1 + 3.85
+    private static let stemJ = originJ + 3.85
     private static let stemB: CGFloat = originB + 1.7
     private static let serif: CGFloat = 0.65
     private static let bracket: CGFloat = 0.8
@@ -46,7 +48,7 @@ enum StatusIcon {
         return path
     }()
 
-    private static let size = NSSize(width: ceil(letterB.boundingBoxOfPath.maxX + 1), height: 18)
+    private static let size = NSSize(width: ceil(letterB.boundingBoxOfPath.maxX), height: 18)
 
     /// Drawn on demand, so the label color follows the menu bar's light or dark appearance.
     static func image(level: NSColor?) -> NSImage {

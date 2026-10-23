@@ -145,7 +145,8 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
 
         button.image = StatusIcon.image(level: headline.level?.color)
         button.imagePosition = .imageLeading
-        button.title = headline != .unknown ? " " + headline.shortText : ""
+        button.imageHugsTitle = true
+        button.title = headline != .unknown ? headline.shortText : ""
         button.toolTip = model.hotKeyEnabled ? "JokenBar – ⌃⌥J" : "JokenBar"
     }
 }
