@@ -121,8 +121,8 @@ Try the email code instead, or open an issue.
 
 Each account gets its own WebKit data store (`WKWebsiteDataStore(forIdentifier:)`);
 requests are a `fetch` running in an invisible web view on claude.ai. The API
-doesn't return the monthly reset date, so the app shows the first day of next
-month ("≈").
+doesn't return the monthly reset date, so the app shows only the time left
+until the end of the calendar month ("≈ 8d left").
 
 ## Development
 

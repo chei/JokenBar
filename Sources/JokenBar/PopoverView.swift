@@ -102,7 +102,8 @@ private struct UsageDetails: View {
                 GaugeRow(
                     title: "Monthly",
                     used: 1 - budget.remainingFraction,
-                    footnote: "resets ≈ \(Fmt.day(reset)) · \(timeLeft(until: reset, now: now))",
+                    // The API returns no reset date; this is the end of the calendar month.
+                    footnote: "≈ \(timeLeft(until: reset, now: now))",
                     total: budget.limit
                 )
             }
@@ -111,7 +112,8 @@ private struct UsageDetails: View {
                     title: Fmt.limitTitle(limit.kind),
                     used: limit.percent / 100,
                     footnote: limit.resetsAt.map { reset in
-                        let when = limit.kind == "session" ? Fmt.time(reset) : Fmt.date(reset)
+                        // Weekly windows end within 7 days, so the weekday is unambiguous.
+                        let when = limit.kind == "session" ? Fmt.time(reset) : Fmt.weekday(reset)
                         return "resets \(when) · \(timeLeft(until: reset, now: now))"
                     }
                 )
@@ -358,6 +360,10 @@ enum Fmt {
 
     static func day(_ date: Date) -> String {
         date.formatted(.dateTime.month(.abbreviated).day())
+    }
+
+    static func weekday(_ date: Date) -> String {
+        date.formatted(.dateTime.weekday(.wide).hour().minute())
     }
 
     static func time(_ date: Date) -> String {
