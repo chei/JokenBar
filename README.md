@@ -8,13 +8,15 @@ bar. No Dock icon, no system permissions, one request to claude.ai every
 
 <!-- Screenshot: docs/screenshot.png -->
 
-| Menu bar | Meaning |
-|---|---|
-| 🎁 `26%` | work (Enterprise) account: *Included usage* grant used |
-| 💲 `25%` | work account: monthly limit used once included usage has expired |
-| ⏱ `34%` | personal Pro/Max account: current session (5-hour limit) used |
+The menu bar shows a **JB** icon and the percent used of the top account's
+most relevant limit:
 
-Color: 🟢 plenty left · 🟠 running low · 🔴 almost gone.
+| Account | Percent shown |
+|---|---|
+| work (Enterprise) | *Included usage* grant, then the monthly limit once it has expired |
+| personal Pro/Max | current session (5-hour limit) |
+
+The inside of the B shows the level: 🟢 plenty left · 🟠 running low · 🔴 almost gone.
 
 Click it (or press **⌃⌥J**) for details: included usage and its expiry, monthly
 limit and reset, Pro/Max weekly limit, several accounts at once.

@@ -143,21 +143,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         guard let button = statusItem?.button else { return }
         let headline = model.menuBarSnapshot?.headline() ?? .unknown
 
-        let symbol: String
-        switch headline {
-        case .included: symbol = "gift.fill"
-        case .monthly: symbol = "dollarsign.circle.fill"
-        case .percent: symbol = "gauge.with.dots.needle.33percent"
-        case .unknown: symbol = "questionmark.circle"
-        }
-        let color = headline.level?.color ?? .secondaryLabelColor
-        let configuration = NSImage.SymbolConfiguration(pointSize: 13, weight: .medium)
-            .applying(NSImage.SymbolConfiguration(paletteColors: [color]))
-        let image = NSImage(systemSymbolName: symbol, accessibilityDescription: "Claude usage")?
-            .withSymbolConfiguration(configuration)
-        image?.isTemplate = false
-
-        button.image = image
+        button.image = StatusIcon.image(level: headline.level?.color)
         button.imagePosition = .imageLeading
         button.title = headline != .unknown ? " " + headline.shortText : ""
         button.toolTip = model.hotKeyEnabled ? "JokenBar – ⌃⌥J" : "JokenBar"
