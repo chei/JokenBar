@@ -92,7 +92,7 @@ private struct UsageDetails: View {
             ForEach(snapshot.dollarWindows, id: \.key) { window in
                 GaugeRow(
                     title: "Included",
-                    used: 1 - window.remainingFraction,
+                    used: window.usedFraction,
                     footnote: window.resetsAt.map { "expires \(Fmt.day($0)) · \(timeLeft(until: $0, now: now))" },
                     total: window.limit
                 )
@@ -101,7 +101,7 @@ private struct UsageDetails: View {
                 let reset = nextMonthlyReset(after: now)
                 GaugeRow(
                     title: "Monthly",
-                    used: 1 - budget.remainingFraction,
+                    used: budget.usedFraction,
                     // The API returns no reset date; assume midnight on the 1st.
                     footnote: timeLeft(until: reset, now: now),
                     total: budget.limit

@@ -28,7 +28,7 @@ public struct DollarWindow: Equatable {
     public var resetsAt: Date?
     public var isLocked: Bool
 
-    public var remainingFraction: Double { limit > 0 ? min(max(remaining / limit, 0), 1) : 0 }
+    public var usedFraction: Double { limit > 0 ? min(max(used / limit, 0), 1) : 1 }
 
     public func isActive(now: Date) -> Bool {
         !isLocked && remaining > 0 && (resetsAt.map { $0 > now } ?? true)
@@ -82,7 +82,7 @@ public struct MonthlyBudget: Equatable {
     }
 
     public var remaining: Double { max(limit - used, 0) }
-    public var remainingFraction: Double { limit > 0 ? min(remaining / limit, 1) : 0 }
+    public var usedFraction: Double { limit > 0 ? min(max(used / limit, 0), 1) : 1 }
 }
 
 public struct PercentLimit: Equatable {

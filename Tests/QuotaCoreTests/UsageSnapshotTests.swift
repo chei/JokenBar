@@ -112,8 +112,9 @@ struct UsageSnapshotTests {
     }
 
     @Test func levelThresholds() {
-        #expect(Level(remainingFraction: 0.8) == .ok)
-        #expect(Level(remainingFraction: 0.3) == .warning)
-        #expect(Level(remainingFraction: 0.1) == .critical)
+        #expect(Level(usedFraction: 0.74) == .ok)
+        #expect(Level(usedFraction: 0.75) == .warning)
+        #expect(Level(usedFraction: 0.89) == .warning)
+        #expect(Level(usedFraction: 0.9) == .critical)
     }
 }

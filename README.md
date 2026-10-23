@@ -16,7 +16,7 @@ most relevant limit:
 | work (Enterprise) | *Included usage* grant, then the monthly limit once it has expired |
 | personal Pro/Max | current session (5-hour limit) |
 
-The inside of the B shows the level: 🟢 plenty left · 🟠 running low · 🔴 almost gone.
+The slot between the J and the B shows the level: 🟢 under 75% used · 🟠 75–90% · 🔴 90% and over.
 
 Click it (or press **⌃⌥J**) for details: included usage and its expiry, monthly
 limit and reset, Pro/Max weekly limit, several accounts at once.
