@@ -48,7 +48,9 @@ enum StatusIcon {
         return path
     }()
 
-    private static let size = NSSize(width: ceil(letterB.boundingBoxOfPath.maxX), height: 18)
+    /// Room between the B and the percentage; the button itself adds none.
+    private static let spacing: CGFloat = 3
+    private static let size = NSSize(width: ceil(letterB.boundingBoxOfPath.maxX) + spacing, height: 18)
 
     /// Drawn on demand, so the label color follows the menu bar's light or dark appearance.
     static func image(level: NSColor?) -> NSImage {
