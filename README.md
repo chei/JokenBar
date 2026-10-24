@@ -32,8 +32,7 @@ Turn off **Launch at Login** under **Settings ›**, right-click the JokenBar ic
 → **Quit JokenBar**, then:
 
 ```sh
-rm -rf /Applications/JokenBar.app ~/Applications/JokenBar.app \
-  ~/Library/WebKit/io.github.chei.jokenbar ~/Library/Caches/io.github.chei.jokenbar
+rm -rf /Applications/JokenBar.app ~/Applications/JokenBar.app ~/Library/WebKit/io.github.chei.jokenbar
 defaults delete io.github.chei.jokenbar
 ```
 
@@ -42,8 +41,9 @@ defaults delete io.github.chei.jokenbar
 Command Line Tools are enough, no Xcode needed.
 
 ```sh
+git clone https://github.com/chei/JokenBar.git && cd JokenBar
 scripts/test.sh        # unit tests
-scripts/build-app.sh   # dist/JokenBar.app
+scripts/build-app.sh   # dist/JokenBar.app, copy it to Applications
 ```
 
 To release, bump `VERSION` and push to `main`.
