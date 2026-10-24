@@ -109,7 +109,7 @@ private struct UsageDetails: View {
             }
             ForEach(snapshot.percentLimits, id: \.kind) { limit in
                 GaugeRow(
-                    title: Fmt.limitTitle(limit.kind),
+                    title: limit.title,
                     used: limit.percent / 100,
                     footnote: limit.resetsAt.map { reset in
                         // Weekly windows end within 7 days, so the weekday is unambiguous.
@@ -368,13 +368,5 @@ enum Fmt {
 
     static func time(_ date: Date) -> String {
         date.formatted(.dateTime.hour().minute())
-    }
-
-    static func limitTitle(_ kind: String) -> String {
-        switch kind {
-        case "session": return "Session"
-        case "weekly_all": return "Week"
-        default: return kind
-        }
     }
 }

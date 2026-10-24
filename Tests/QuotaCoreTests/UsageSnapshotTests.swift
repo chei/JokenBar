@@ -111,6 +111,14 @@ struct UsageSnapshotTests {
         #expect(curly.displayName == "user@example.com")
     }
 
+    @Test func limitTitlesAreReadable() {
+        func title(_ kind: String) -> String { PercentLimit(kind: kind, percent: 0).title }
+        #expect(title("session") == "Session")
+        #expect(title("weekly_all") == "Week")
+        #expect(title("weekly_opus") == "Week · Opus")
+        #expect(title("weekly_oauth_apps") == "Week · Oauth Apps")
+    }
+
     @Test func levelThresholds() {
         #expect(Level(usedFraction: 0.74) == .ok)
         #expect(Level(usedFraction: 0.75) == .warning)

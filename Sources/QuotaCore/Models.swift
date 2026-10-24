@@ -89,6 +89,17 @@ public struct PercentLimit: Equatable {
     public var kind: String
     public var percent: Double
     public var resetsAt: Date?
+
+    /// "session" → "Session", "weekly_all" → "Week", "weekly_opus" → "Week · Opus".
+    /// Kinds are snake_case and new ones appear without notice, so build the title from the parts.
+    public var title: String {
+        var parts = kind.split(separator: "_").map { String($0).capitalized }
+        guard !parts.isEmpty else { return kind }
+        if parts[0] == "Weekly" { parts[0] = "Week" }
+        parts.removeAll { $0 == "All" }
+        let scope = parts.dropFirst().joined(separator: " ")
+        return scope.isEmpty ? parts[0] : "\(parts[0]) · \(scope)"
+    }
 }
 
 public struct Organization: Codable, Equatable, Hashable, Identifiable {
