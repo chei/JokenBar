@@ -64,6 +64,7 @@ private struct OrgCard: View {
                 Text(org.displayName).font(.headline).lineLimit(1)
                 content
             }
+            .frame(maxWidth: .infinity, alignment: .leading)
             .padding(10)
             .background(Color.primary.opacity(0.05), in: RoundedRectangle(cornerRadius: 8))
         }
@@ -194,8 +195,8 @@ private struct FooterView: View {
 
     var body: some View {
         HStack {
-            if let lastRefresh = model.lastRefresh {
-                Text("Updated \(lastRefresh.formatted(date: .omitted, time: .shortened))")
+            if let status {
+                Text(status)
                     .font(.caption)
                     .foregroundStyle(.secondary)
             }
@@ -209,6 +210,12 @@ private struct FooterView: View {
             .help("Refresh")
             Spacer()
         }
+    }
+
+    private var status: String? {
+        let updated = model.lastRefresh?.formatted(date: .omitted, time: .shortened)
+        if model.isOffline { return updated.map { "Offline · updated \($0)" } ?? "Offline" }
+        return updated.map { "Updated \($0)" }
     }
 }
 

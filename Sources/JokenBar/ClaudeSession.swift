@@ -6,12 +6,15 @@ enum ClaudeError: LocalizedError {
     case http(Int)
     case badResponse
     case loadFailed(Error)
+    /// claude.ai could not be reached: no network, DNS failure, timeout.
+    case offline
 
     var errorDescription: String? {
         switch self {
         case .http(let status): return "HTTP \(status)"
         case .badResponse: return "Unexpected response from claude.ai"
         case .loadFailed(let error): return error.localizedDescription
+        case .offline: return "Offline"
         }
     }
 
@@ -31,8 +34,12 @@ enum WebFetcher {
     @MainActor
     static func get(_ path: String, in webView: WKWebView) async throws -> Data {
         let js = """
-        const r = await fetch(path, {credentials: 'include', headers: {accept: 'application/json'}});
-        return [r.status, await r.text()];
+        try {
+            const r = await fetch(path, {credentials: 'include', headers: {accept: 'application/json'}});
+            return [r.status, await r.text()];
+        } catch {
+            return [0, ''];
+        }
         """
         let result: Any = try await withCheckedThrowingContinuation { continuation in
             webView.callAsyncJavaScript(js, arguments: ["path": path], in: nil, in: .defaultClient) { result in
@@ -43,6 +50,8 @@ enum WebFetcher {
               let status = (pair[0] as? NSNumber)?.intValue,
               let body = pair[1] as? String
         else { throw ClaudeError.badResponse }
+        // A same-origin fetch or body read only fails when the network does.
+        if status == 0 { throw ClaudeError.offline }
         guard (200..<300).contains(status) else { throw ClaudeError.http(status) }
         return Data(body.utf8)
     }
@@ -96,10 +105,19 @@ final class ClaudeSession: NSObject, WKNavigationDelegate {
         guard let continuation = loadContinuation else { return }
         loadContinuation = nil
         if let error {
-            continuation.resume(throwing: ClaudeError.loadFailed(error))
+            continuation.resume(throwing: Self.isNetworkFailure(error) ? ClaudeError.offline : ClaudeError.loadFailed(error))
         } else {
             continuation.resume()
         }
+    }
+
+    private static func isNetworkFailure(_ error: Error) -> Bool {
+        let codes: Set<URLError.Code> = [
+            .notConnectedToInternet, .networkConnectionLost, .timedOut,
+            .cannotFindHost, .cannotConnectToHost, .dnsLookupFailed,
+            .internationalRoamingOff, .dataNotAllowed,
+        ]
+        return (error as? URLError).map { codes.contains($0.code) } ?? false
     }
 
     func webView(_ webView: WKWebView, didFinish navigation: WKNavigation!) {

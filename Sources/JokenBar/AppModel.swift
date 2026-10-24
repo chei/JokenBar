@@ -23,6 +23,8 @@ final class AppModel: ObservableObject {
     @Published private(set) var states: [String: OrgState] = [:]
     @Published private(set) var lastRefresh: Date?
     @Published private(set) var isRefreshing = false
+    /// The last refresh could not reach claude.ai; the cards keep their last data.
+    @Published private(set) var isOffline = false
     /// The popover's settings section; collapses whenever the popover closes.
     /// `settingsExpanded` drives the chevron, `settingsReveal` (0…1) the animated height.
     @Published var settingsExpanded = false
@@ -71,37 +73,45 @@ final class AppModel: ObservableObject {
     func refreshAll() async {
         guard !isRefreshing else { return }
         isRefreshing = true
-        defer {
-            isRefreshing = false
-            lastRefresh = Date()
-        }
+        defer { isRefreshing = false }
+        var offline = false
         for account in accounts {
-            await refresh(account)
+            if await !refresh(account) { offline = true }
         }
+        isOffline = offline
+        // Offline, "Updated" keeps the time of the data still shown.
+        if !offline { lastRefresh = Date() }
     }
 
-    private func refresh(_ account: Account) async {
+    /// Returns false when claude.ai could not be reached.
+    private func refresh(_ account: Account) async -> Bool {
         let session = session(for: account.id)
         do {
             let orgs = try await session.organizations()
             updateOrganizations(orgs, for: account.id)
         } catch let error as ClaudeError where error.isAuthError {
             for org in account.organizations { states[org.uuid] = .needsLogin }
-            return
+            return true
         } catch {
             // Keep the last known org list and try usage anyway.
         }
         let orgs = accounts.first { $0.id == account.id }?.organizations ?? []
+        var reached = true
         for org in orgs {
             if states[org.uuid] == nil { states[org.uuid] = .loading }
             do {
                 states[org.uuid] = .loaded(try await session.usage(orgID: org.uuid))
             } catch let error as ClaudeError where error.isAuthError || error.isNotFound {
                 states[org.uuid] = .unavailable
+            } catch ClaudeError.offline {
+                reached = false
+                if case .loaded? = states[org.uuid] { continue }
+                states[org.uuid] = .failed(ClaudeError.offline.localizedDescription)
             } catch {
                 states[org.uuid] = .failed(error.localizedDescription)
             }
         }
+        return reached
     }
 
     private func session(for accountID: UUID) -> ClaudeSession {
