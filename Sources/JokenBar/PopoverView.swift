@@ -89,6 +89,9 @@ private struct UsageDetails: View {
     var body: some View {
         let now = Date()
         VStack(alignment: .leading, spacing: 10) {
+            if !snapshot.hasLimits {
+                Text("No usage data for this plan").font(.caption).foregroundStyle(.secondary)
+            }
             ForEach(snapshot.dollarWindows, id: \.key) { window in
                 GaugeRow(
                     title: "Included",

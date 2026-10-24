@@ -111,6 +111,10 @@ struct UsageSnapshotTests {
         #expect(curly.displayName == "user@example.com")
     }
 
+    @Test func emptyResponseHasNoLimits() throws {
+        #expect(try UsageSnapshot.parse(Data("{}".utf8)).hasLimits == false)
+    }
+
     @Test func limitTitlesAreReadable() {
         func title(_ kind: String) -> String { PercentLimit(kind: kind, percent: 0).title }
         #expect(title("session") == "Session")

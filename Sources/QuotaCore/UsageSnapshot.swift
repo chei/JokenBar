@@ -97,6 +97,11 @@ public extension UsageSnapshot {
         return result
     }
 
+    /// False when the response holds no limit to show, e.g. on the Free plan.
+    var hasLimits: Bool {
+        !dollarWindows.isEmpty || monthlyBudget?.enabled == true || !percentLimits.isEmpty
+    }
+
     /// The single value shown in the menu bar.
     /// Included grant while it lasts, then the monthly budget, then the session
     /// limit (else the highest percent limit).
