@@ -46,8 +46,6 @@ scripts/test.sh        # unit tests
 scripts/build-app.sh   # dist/JokenBar.app, copy it to Applications
 ```
 
-To release, bump `VERSION` and push to `main`.
-
 ## License
 
 [MIT](LICENSE)
