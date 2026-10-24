@@ -1,13 +1,11 @@
 # JokenBar
 
-**Your Claude limits, one glance away.**
+**Your Claude usage in the Mac menu bar.**
 
-![JokenBar in the menu bar](docs/screenshot.png)
+![JokenBar popover showing a work and a personal account](docs/screenshot.png)
 
-A tiny macOS menu bar app for Claude and Claude Code. Your work and personal
-accounts side by side: Enterprise included usage and monthly limit, Pro/Max
-session and weekly limits. The JB turns orange at 75% and red at 90%.
-Press **⌃⌥J** from anywhere.
+Work and personal accounts side by side. The menu bar icon turns orange at
+75% and red at 90%. Press **⌃⌥J** to open it from anywhere.
 
 ## Install
 
@@ -17,20 +15,21 @@ macOS 14 or later. Paste into Terminal:
 curl -fsSL https://raw.githubusercontent.com/chei/JokenBar/main/install.sh | bash
 ```
 
-Run it again to update, or build it yourself with `scripts/build-app.sh`
-(Command Line Tools are enough). Then click **JB** → **Add Account…** and sign in to
-claude.ai as usual. More accounts go under **Settings ›**.
+Then click the JokenBar icon → **Add Account…** and sign in to claude.ai as
+usual. Add more accounts under **Settings ›**.
+
+Run the same command again to update.
 
 ## Privacy
 
 JokenBar talks only to claude.ai and reads the same numbers as its Usage page.
-You sign in on claude.ai's own page; the app never sees your password and
-stores no tokens. It's not affiliated with Anthropic and relies on undocumented
-endpoints, so a change on their side can break it.
+You sign in on claude.ai's own page, just like in a browser, and the app never
+sees your password.
 
 ## Uninstall
 
-Right-click **JB** → **Quit JokenBar**, then:
+Turn off **Launch at Login** under **Settings ›**, right-click the JokenBar icon
+→ **Quit JokenBar**, then:
 
 ```sh
 rm -rf /Applications/JokenBar.app ~/Applications/JokenBar.app \
@@ -39,6 +38,8 @@ defaults delete io.github.chei.jokenbar
 ```
 
 ## Development
+
+Command Line Tools are enough, no Xcode needed.
 
 ```sh
 scripts/test.sh        # unit tests
