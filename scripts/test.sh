@@ -6,8 +6,13 @@ set -euo pipefail
 
 FRAMEWORKS="$(xcode-select -p)/Library/Developer/Frameworks"
 if [[ "$(xcode-select -p)" == */CommandLineTools && -d "$FRAMEWORKS/Testing.framework" ]]; then
+  # Command Line Tools 27 keep the @Test macro plugin outside the default plugin path.
+  PLUGINS="$(xcode-select -p)/usr/lib/swift/host/plugins/testing"
+  EXTRA=()
+  [[ -d "$PLUGINS" ]] && EXTRA=(-Xswiftc -plugin-path -Xswiftc "$PLUGINS")
   exec swift test \
     -Xswiftc -F -Xswiftc "$FRAMEWORKS" \
+    ${EXTRA[@]+"${EXTRA[@]}"} \
     -Xswiftc -Xfrontend -Xswiftc -disable-cross-import-overlays \
     -Xlinker -rpath -Xlinker "$FRAMEWORKS" \
     "$@"

@@ -310,10 +310,15 @@ private struct MenuRow<Trailing: View>: View {
     let title: String
     let action: () -> Void
     @ViewBuilder let trailing: Trailing
-    @State private var isHovered = false
-    /// Expanding the section can lay a row out under a still mouse, which AppKit
-    /// reports as hover; only highlight once the mouse has actually moved.
-    @State private var mouseAtAppear: NSPoint?
+    // Not @State: from the macOS 27 SDK on it is a macro whose plugin ships only with Xcode.
+    @StateObject private var hover = HoverState()
+
+    final class HoverState: ObservableObject {
+        @Published var isHovered = false
+        /// Expanding the section can lay a row out under a still mouse, which AppKit
+        /// reports as hover; only highlight once the mouse has actually moved.
+        var mouseAtAppear: NSPoint?
+    }
 
     var body: some View {
         Button(action: action) {
@@ -325,15 +330,15 @@ private struct MenuRow<Trailing: View>: View {
             .padding(.horizontal, 6)
             .padding(.vertical, 3)
             // Faint grey like the rows in the Wi-Fi menu, not a blue menu selection.
-            .background(isHovered ? Color.primary.opacity(0.1) : .clear, in: RoundedRectangle(cornerRadius: 4))
+            .background(hover.isHovered ? Color.primary.opacity(0.1) : .clear, in: RoundedRectangle(cornerRadius: 4))
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .onAppear { mouseAtAppear = NSEvent.mouseLocation }
+        .onAppear { hover.mouseAtAppear = NSEvent.mouseLocation }
         .onContinuousHover { phase in
             switch phase {
-            case .active: isHovered = NSEvent.mouseLocation != mouseAtAppear
-            case .ended: isHovered = false
+            case .active: hover.isHovered = NSEvent.mouseLocation != hover.mouseAtAppear
+            case .ended: hover.isHovered = false
             }
         }
     }
