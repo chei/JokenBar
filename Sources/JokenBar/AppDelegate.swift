@@ -183,12 +183,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
         button.image = StatusIcon.image(level: headline.level?.color)
         button.imagePosition = .imageLeading
         button.imageHugsTitle = true
-        // An explicit label color: a plain title fades far more than other items
-        // on the menu bar of an inactive display.
-        button.attributedTitle = NSAttributedString(
-            string: headline != .unknown ? headline.shortText : "",
-            attributes: [.foregroundColor: NSColor.labelColor, .font: NSFont.menuBarFont(ofSize: 0)]
-        )
+        button.title = headline != .unknown ? headline.shortText : ""
         button.toolTip = model.hotKeyEnabled ? "JokenBar – ⌃⌥J" : "JokenBar"
     }
 }
