@@ -63,7 +63,7 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
 
         updateStatusItem()
         if model.accounts.isEmpty {
-            DispatchQueue.main.async { self.togglePopover() }
+            showPopoverOncePlaced()
         }
         Task {
             await model.removeOrphanedDataStores()
@@ -92,6 +92,21 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
             // start unfocused so the focus ring only shows once the user presses Tab.
             DispatchQueue.main.async { self.popover.contentViewController?.view.window?.makeFirstResponder(nil) }
             Task { await model.refreshIfStale() }
+        }
+    }
+
+    /// A new status item gets its place in the menu bar only after launch: its window starts
+    /// with zero height, then sits off screen for a moment. A popover shown before it reaches
+    /// the top of the screen doesn't appear at all, or appears in the wrong corner.
+    private func showPopoverOncePlaced(attempts: Int = 40) {
+        guard attempts > 0 else { return }
+        if let window = statusItem.button?.window, let screen = window.screen,
+           window.frame.height > 0, window.frame.maxY >= screen.frame.maxY - 1 {
+            togglePopover()
+        } else {
+            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+                self.showPopoverOncePlaced(attempts: attempts - 1)
+            }
         }
     }
 
