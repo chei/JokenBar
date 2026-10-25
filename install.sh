@@ -36,4 +36,4 @@ ditto "$tmp/$APP_NAME" "$APP_DIR/$APP_NAME"
 xattr -dr com.apple.quarantine "$APP_DIR/$APP_NAME" 2>/dev/null || true
 
 open "$APP_DIR/$APP_NAME"
-echo "Installed $APP_DIR/$APP_NAME – look for the icon on the right side of the menu bar."
+echo "Installed $APP_DIR/$APP_NAME – the JokenBar icon is now in your menu bar."
