@@ -102,6 +102,14 @@ public struct PercentLimit: Equatable {
     }
 }
 
+/// `GET /api/account`: only the user's id is used, to recognize a login that is already listed.
+public enum ClaudeAccount {
+    public static func parseID(_ data: Data) throws -> String {
+        struct Raw: Decodable { var uuid: String }
+        return try ClaudeJSON.decoder.decode(Raw.self, from: data).uuid
+    }
+}
+
 public struct Organization: Codable, Equatable, Hashable, Identifiable {
     public var uuid: String
     public var name: String

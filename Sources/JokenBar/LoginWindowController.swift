@@ -7,12 +7,12 @@ import WebKit
 @MainActor
 final class LoginWindowController: NSWindowController, NSWindowDelegate {
     private let webView: WKWebView
-    private let onSuccess: ([Organization]) -> Void
+    private let onSuccess: ([Organization], _ userID: String?) -> Void
     private let onClose: () -> Void
     private var pollTask: Task<Void, Never>?
     private var succeeded = false
 
-    init(accountID: UUID, onSuccess: @escaping ([Organization]) -> Void, onClose: @escaping () -> Void) {
+    init(accountID: UUID, onSuccess: @escaping ([Organization], _ userID: String?) -> Void, onClose: @escaping () -> Void) {
         self.onSuccess = onSuccess
         self.onClose = onClose
         let configuration = WKWebViewConfiguration()
@@ -56,9 +56,11 @@ final class LoginWindowController: NSWindowController, NSWindowDelegate {
         guard let data = try? await WebFetcher.get("/api/organizations", in: webView),
               let orgs = try? Organization.parseList(data), !orgs.isEmpty
         else { return }
+        let userID = (try? await WebFetcher.get("/api/account", in: webView))
+            .flatMap { try? ClaudeAccount.parseID($0) }
         succeeded = true
         pollTask?.cancel()
-        onSuccess(orgs)
+        onSuccess(orgs, userID)
         close()
     }
 

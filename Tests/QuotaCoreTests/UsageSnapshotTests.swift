@@ -103,6 +103,10 @@ struct UsageSnapshotTests {
         #expect(orgs.first?.name == "Example Org")
     }
 
+    @Test func accountIDIdentifiesTheUser() throws {
+        #expect(try ClaudeAccount.parseID(fixture("account")) == "user-1")
+    }
+
     @Test func displayNameShowsEmailForPersonalOrgs() throws {
         let orgs = try Organization.parseList(fixture("organizations"))
         #expect(orgs.map(\.displayName) == ["Example Org", "user@example.com"])

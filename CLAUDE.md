@@ -14,6 +14,7 @@ Tiny macOS menu bar app showing Claude / Claude Code usage limits.
 
 ## Data source (undocumented claude.ai endpoints)
 - `GET /api/organizations` → `[{uuid, name, capabilities}]`; keep only orgs whose capabilities contain `"chat"`.
+- `GET /api/account` → `{uuid, email_address, …}`; only `uuid` is used, to replace an account when the same user signs in again (colleagues in one org stay separate).
 - `GET /api/organizations/{uuid}/usage`:
   - Any top-level object with `limit_dollars`/`used_dollars`/`remaining_dollars` is a dollar allowance (currently `copper_kite` = Enterprise "Included usage"; `resets_at` = expiry). Detect by shape, never by key name: keys are rotating code names.
   - `spend` (fallback `extra_usage`): monthly per-user spend limit in minor units (`amount_minor`, `exponent`). No reset date is returned; the app shows only the time left until midnight on the 1st ("8d left"). Weekly limits show the reset weekday, session limits only the time.
@@ -29,4 +30,4 @@ Tiny macOS menu bar app showing Claude / Claude Code usage limits.
 ## Ideas (not committed to)
 - Burn rate / forecast line for included usage.
 - Configurable hotkey.
-- Hardening: allow only GET to the two endpoints above in `WebFetcher`.
+- Hardening: allow only GET to the three endpoints above in `WebFetcher`.

@@ -12,8 +12,27 @@ enum JokenBarMain {
     static func main() {
         let app = NSApplication.shared
         app.setActivationPolicy(.accessory) // no Dock icon
+        app.mainMenu = editMenu()
         app.delegate = delegate
         app.run()
+    }
+
+    /// Never shown (no Dock icon, no menu bar), but without it ⌘C, ⌘V and ⌘A don't
+    /// reach the sign-in page, e.g. to paste the email code.
+    private static func editMenu() -> NSMenu {
+        let edit = NSMenu(title: "Edit")
+        edit.addItem(withTitle: "Undo", action: Selector(("undo:")), keyEquivalent: "z")
+        edit.addItem(withTitle: "Redo", action: Selector(("redo:")), keyEquivalent: "Z")
+        edit.addItem(.separator())
+        edit.addItem(withTitle: "Cut", action: #selector(NSText.cut(_:)), keyEquivalent: "x")
+        edit.addItem(withTitle: "Copy", action: #selector(NSText.copy(_:)), keyEquivalent: "c")
+        edit.addItem(withTitle: "Paste", action: #selector(NSText.paste(_:)), keyEquivalent: "v")
+        edit.addItem(withTitle: "Select All", action: #selector(NSText.selectAll(_:)), keyEquivalent: "a")
+        let main = NSMenu()
+        main.addItem(NSMenuItem()) // the app menu's slot
+        main.addItem(NSMenuItem(title: "Edit", action: nil, keyEquivalent: ""))
+        main.items[1].submenu = edit
+        return main
     }
 }
 
@@ -96,17 +115,20 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
     }
 
     /// A new status item gets its place in the menu bar only after launch: its window starts
-    /// with zero height, then sits off screen for a moment. A popover shown before it reaches
-    /// the top of the screen doesn't appear at all, or appears in the wrong corner.
-    private func showPopoverOncePlaced(attempts: Int = 40) {
-        guard attempts > 0 else { return }
-        if let window = statusItem.button?.window, let screen = window.screen,
-           window.frame.height > 0, window.frame.maxY >= screen.frame.maxY - 1 {
+    /// with zero height, then appears at the right end and moves to its remembered spot a
+    /// moment later. A popover shown before that doesn't appear or opens in the wrong place,
+    /// so wait until the item has stayed put at the top of the screen for a while.
+    private func showPopoverOncePlaced(attempts: Int = 60, lastFrame: NSRect = .zero, steadyFor: Int = 0) {
+        guard attempts > 0, let window = statusItem.button?.window else { return }
+        let frame = window.frame
+        let placed = frame.height > 0 && window.screen.map { frame.maxY >= $0.frame.maxY - 1 } ?? false
+        let steady = placed && frame == lastFrame ? steadyFor + 1 : 0
+        if steady >= 6 { // 0.3 s
             togglePopover()
-        } else {
-            DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
-                self.showPopoverOncePlaced(attempts: attempts - 1)
-            }
+            return
+        }
+        DispatchQueue.main.asyncAfter(deadline: .now() + 0.05) {
+            self.showPopoverOncePlaced(attempts: attempts - 1, lastFrame: frame, steadyFor: steady)
         }
     }
 

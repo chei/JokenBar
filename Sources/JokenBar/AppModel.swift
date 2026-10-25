@@ -6,6 +6,8 @@ import WebKit
 struct Account: Codable, Identifiable, Equatable {
     var id: UUID
     var organizations: [Organization]
+    /// claude.ai's id of the signed-in user; nil for accounts saved before it was recorded.
+    var userID: String?
 }
 
 enum OrgState {
@@ -89,6 +91,14 @@ final class AppModel: ObservableObject {
         do {
             let orgs = try await session.organizations()
             updateOrganizations(orgs, for: account.id)
+            if account.userID == nil, let userID = try? await session.userID() {
+                // A duplicate added before user ids were recorded goes away.
+                if accounts.contains(where: { $0.userID == userID }) {
+                    remove(account)
+                    return true
+                }
+                setUserID(userID, for: account.id)
+            }
         } catch let error as ClaudeError where error.isAuthError {
             for org in account.organizations { states[org.uuid] = .needsLogin }
             return true
@@ -128,19 +138,33 @@ final class AppModel: ObservableObject {
         let accountID = account?.id ?? UUID()
         loginWindow = LoginWindowController(
             accountID: accountID,
-            onSuccess: { [weak self] orgs in
+            onSuccess: { [weak self] orgs, userID in
                 guard let self else { return }
                 if !self.accounts.contains(where: { $0.id == accountID }) {
-                    self.accounts.append(Account(id: accountID, organizations: orgs))
-                    self.saveAccounts()
+                    self.add(Account(id: accountID, organizations: orgs, userID: userID))
                 }
                 self.updateOrganizations(orgs, for: accountID)
+                if let userID { self.setUserID(userID, for: accountID) }
                 self.sessions[accountID] = nil
                 Task { await self.refreshAll() }
             },
             onClose: { [weak self] in self?.loginWindow = nil }
         )
         loginWindow?.start()
+    }
+
+    /// Signing in again as a user who is already listed replaces that account in place,
+    /// since the new login holds the fresher session. Colleagues in the same org stay separate.
+    private func add(_ account: Account) {
+        if let userID = account.userID, let index = accounts.firstIndex(where: { $0.userID == userID }) {
+            let old = accounts[index]
+            accounts[index] = account
+            sessions[old.id] = nil
+            Task { try? await WKWebsiteDataStore.remove(forIdentifier: old.id) }
+        } else {
+            accounts.append(account)
+        }
+        saveAccounts()
     }
 
     /// Drag-to-reorder in settings; the order also decides the menu bar org.
@@ -167,6 +191,14 @@ final class AppModel: ObservableObject {
         for id in await WKWebsiteDataStore.allDataStoreIdentifiers where !known.contains(id) {
             try? await WKWebsiteDataStore.remove(forIdentifier: id)
         }
+    }
+
+    private func setUserID(_ userID: String, for accountID: UUID) {
+        guard let index = accounts.firstIndex(where: { $0.id == accountID }),
+              accounts[index].userID != userID
+        else { return }
+        accounts[index].userID = userID
+        saveAccounts()
     }
 
     private func updateOrganizations(_ orgs: [Organization], for accountID: UUID) {
