@@ -28,10 +28,10 @@ sees your password.
 
 ## Uninstall
 
-Turn off **Launch at Login** under **Settings ›**, right-click the JokenBar icon
-→ **Quit JokenBar**, then:
+Paste into Terminal:
 
 ```sh
+pkill -x JokenBar
 rm -rf /Applications/JokenBar.app ~/Applications/JokenBar.app ~/Library/WebKit/io.github.chei.jokenbar
 defaults delete io.github.chei.jokenbar
 ```
