@@ -64,7 +64,9 @@ private struct OrgCard: View {
                 HStack(spacing: 4) {
                     Text(org.displayName)
                     if let detail {
-                        Text("· \(detail)").foregroundStyle(.secondary)
+                        // Regular weight: in semibold, the vibrant secondary color over a dark
+                        // background reads darker and heavier than the name itself.
+                        Text("· \(detail)").fontWeight(.regular).foregroundStyle(.secondary)
                     }
                 }
                 .font(.headline)
