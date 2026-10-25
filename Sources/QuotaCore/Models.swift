@@ -102,11 +102,16 @@ public struct PercentLimit: Equatable {
     }
 }
 
-/// `GET /api/account`: only the user's id is used, to recognize a login that is already listed.
-public enum ClaudeAccount {
-    public static func parseID(_ data: Data) throws -> String {
-        struct Raw: Decodable { var uuid: String }
-        return try ClaudeJSON.decoder.decode(Raw.self, from: data).uuid
+/// `GET /api/account`: who is signed in. The id recognizes a login that is already listed,
+/// the email tells apart colleagues in the same org.
+public struct ClaudeAccount: Equatable {
+    public var id: String
+    public var email: String?
+
+    public static func parse(_ data: Data) throws -> ClaudeAccount {
+        struct Raw: Decodable { var uuid: String; var emailAddress: String? }
+        let raw = try ClaudeJSON.decoder.decode(Raw.self, from: data)
+        return ClaudeAccount(id: raw.uuid, email: raw.emailAddress)
     }
 }
 
@@ -124,6 +129,13 @@ public struct Organization: Codable, Equatable, Hashable, Identifiable {
     }
 
     public var hasClaudeAI: Bool { capabilities?.contains("chat") ?? true }
+
+    /// The personal plan, e.g. "Pro"; nil for team and enterprise orgs, whose name says enough.
+    public var planName: String? {
+        if capabilities?.contains("claude_max") == true { return "Max" }
+        if capabilities?.contains("claude_pro") == true { return "Pro" }
+        return nil
+    }
 
     /// Personal orgs are named "<email>'s Organization"; show just the email.
     public var displayName: String {

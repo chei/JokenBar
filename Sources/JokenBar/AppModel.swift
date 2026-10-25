@@ -6,8 +6,9 @@ import WebKit
 struct Account: Codable, Identifiable, Equatable {
     var id: UUID
     var organizations: [Organization]
-    /// claude.ai's id of the signed-in user; nil for accounts saved before it was recorded.
+    /// claude.ai's id and email of the signed-in user; nil for accounts saved before they were recorded.
     var userID: String?
+    var email: String?
 }
 
 enum OrgState {
@@ -91,13 +92,13 @@ final class AppModel: ObservableObject {
         do {
             let orgs = try await session.organizations()
             updateOrganizations(orgs, for: account.id)
-            if account.userID == nil, let userID = try? await session.userID() {
+            if account.userID == nil || account.email == nil, let user = try? await session.user() {
                 // A duplicate added before user ids were recorded goes away.
-                if accounts.contains(where: { $0.userID == userID }) {
+                if account.userID == nil, accounts.contains(where: { $0.userID == user.id }) {
                     remove(account)
                     return true
                 }
-                setUserID(userID, for: account.id)
+                setUser(user, for: account.id)
             }
         } catch let error as ClaudeError where error.isAuthError {
             for org in account.organizations { states[org.uuid] = .needsLogin }
@@ -138,13 +139,13 @@ final class AppModel: ObservableObject {
         let accountID = account?.id ?? UUID()
         loginWindow = LoginWindowController(
             accountID: accountID,
-            onSuccess: { [weak self] orgs, userID in
+            onSuccess: { [weak self] orgs, user in
                 guard let self else { return }
                 if !self.accounts.contains(where: { $0.id == accountID }) {
-                    self.add(Account(id: accountID, organizations: orgs, userID: userID))
+                    self.add(Account(id: accountID, organizations: orgs, userID: user?.id, email: user?.email))
                 }
                 self.updateOrganizations(orgs, for: accountID)
-                if let userID { self.setUserID(userID, for: accountID) }
+                if let user { self.setUser(user, for: accountID) }
                 self.sessions[accountID] = nil
                 Task { await self.refreshAll() }
             },
@@ -165,6 +166,11 @@ final class AppModel: ObservableObject {
             accounts.append(account)
         }
         saveAccounts()
+    }
+
+    /// Colleagues in the same org would otherwise get cards with the same title.
+    func isSharedOrgName(_ org: Organization) -> Bool {
+        accounts.flatMap(\.organizations).filter { $0.displayName == org.displayName }.count > 1
     }
 
     /// Drag-to-reorder in settings; the order also decides the menu bar org.
@@ -193,11 +199,12 @@ final class AppModel: ObservableObject {
         }
     }
 
-    private func setUserID(_ userID: String, for accountID: UUID) {
+    private func setUser(_ user: ClaudeAccount, for accountID: UUID) {
         guard let index = accounts.firstIndex(where: { $0.id == accountID }),
-              accounts[index].userID != userID
+              accounts[index].userID != user.id || accounts[index].email != user.email
         else { return }
-        accounts[index].userID = userID
+        accounts[index].userID = user.id
+        accounts[index].email = user.email
         saveAccounts()
     }
 

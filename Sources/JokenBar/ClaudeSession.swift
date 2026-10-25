@@ -82,8 +82,8 @@ final class ClaudeSession: NSObject, WKNavigationDelegate {
         try Organization.parseList(try await get("/api/organizations"))
     }
 
-    func userID() async throws -> String {
-        try ClaudeAccount.parseID(try await get("/api/account"))
+    func user() async throws -> ClaudeAccount {
+        try ClaudeAccount.parse(try await get("/api/account"))
     }
 
     func usage(orgID: String) async throws -> UsageSnapshot {

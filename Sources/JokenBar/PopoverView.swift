@@ -61,13 +61,26 @@ private struct OrgCard: View {
             EmptyView()
         } else {
             VStack(alignment: .leading, spacing: 8) {
-                Text(org.displayName).font(.headline).lineLimit(1)
+                HStack(spacing: 4) {
+                    Text(org.displayName)
+                    if let detail {
+                        Text("· \(detail)").foregroundStyle(.secondary)
+                    }
+                }
+                .font(.headline)
+                .lineLimit(1)
                 content
             }
             .frame(maxWidth: .infinity, alignment: .leading)
             .padding(10)
             .background(Color.primary.opacity(0.05), in: RoundedRectangle(cornerRadius: 8))
         }
+    }
+
+    /// The plan of a personal account, and the email when another card shows the same org.
+    private var detail: String? {
+        let parts = [org.planName, model.isSharedOrgName(org) ? account.email : nil].compactMap { $0 }
+        return parts.isEmpty ? nil : parts.joined(separator: " · ")
     }
 
     @ViewBuilder private var content: some View {
