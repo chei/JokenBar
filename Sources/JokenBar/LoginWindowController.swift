@@ -20,8 +20,10 @@ final class LoginWindowController: NSWindowController, NSWindowDelegate {
         webView = WKWebView(frame: .zero, configuration: configuration)
         webView.customUserAgent = safariUserAgent
 
+        // Tall enough that claude.ai's cookie banner doesn't cover the email code field.
+        let height = min(920, (NSScreen.main?.visibleFrame.height ?? 920) - 40)
         let window = NSWindow(
-            contentRect: NSRect(x: 0, y: 0, width: 560, height: 780),
+            contentRect: NSRect(x: 0, y: 0, width: 560, height: height),
             styleMask: [.titled, .closable, .resizable],
             backing: .buffered,
             defer: false
