@@ -26,7 +26,8 @@
   "starry_waterfall": null, "amber_gauge": null, "extra_usage": null,
   "limits": [
     {"kind": "session", "group": "session", "percent": 3, "severity": "normal", "resets_at": "2026-10-19T09:39:59.648617+00:00", "scope": null, "is_active": true},
-    {"kind": "weekly_all", "group": "weekly", "percent": 0, "severity": "normal", "resets_at": "2026-10-26T08:00:00+00:00", "scope": null, "is_active": false}
+    {"kind": "weekly_all", "group": "weekly", "percent": 0, "severity": "normal", "resets_at": "2026-10-26T08:00:00+00:00", "scope": null, "is_active": false},
+    {"kind": "weekly_scoped", "group": "weekly", "percent": 15, "severity": "normal", "resets_at": "2026-10-26T08:00:00+00:00", "scope": {"model": {"id": null, "display_name": "Fable"}, "surface": null}, "is_active": false}
   ],
   "spend": null, "member_dashboard_available": false, "seven_day_breakdown": null, "weekly_scoped_shares": null
 }

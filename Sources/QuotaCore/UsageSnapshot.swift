@@ -84,7 +84,8 @@ public extension UsageSnapshot {
     var percentLimits: [PercentLimit] {
         let fromList = limits.compactMap { entry -> PercentLimit? in
             guard let kind = entry.kind, let percent = entry.percent else { return nil }
-            return PercentLimit(kind: kind, percent: percent, resetsAt: entry.resetsAt)
+            return PercentLimit(kind: kind, percent: percent, resetsAt: entry.resetsAt,
+                                modelName: entry.scope?.modelName)
         }
         if !fromList.isEmpty { return fromList }
         var result: [PercentLimit] = []

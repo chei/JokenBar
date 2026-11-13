@@ -13,7 +13,24 @@ public struct LimitEntry: Decodable, Equatable {
     public var percent: Double?
     public var severity: String?
     public var resetsAt: Date?
+    public var scope: LimitScope?
     public var isActive: Bool?
+}
+
+/// `scope` of a limit entry, e.g. `{"model": {"display_name": "Fable"}}` for a model-only weekly limit.
+/// Decoding never fails, so a reshaped `scope` cannot break the whole response.
+public struct LimitScope: Decodable, Equatable {
+    public var modelName: String?
+
+    private enum Keys: String, CodingKey { case model }
+    private enum ModelKeys: String, CodingKey { case displayName }
+
+    public init(modelName: String? = nil) { self.modelName = modelName }
+
+    public init(from decoder: Decoder) throws {
+        let model = try? decoder.container(keyedBy: Keys.self).nestedContainer(keyedBy: ModelKeys.self, forKey: .model)
+        modelName = (try? model?.decodeIfPresent(String.self, forKey: .displayName)) ?? nil
+    }
 }
 
 /// A dollar-denominated allowance, e.g. the Enterprise "Included usage" grant.
@@ -89,15 +106,17 @@ public struct PercentLimit: Equatable {
     public var kind: String
     public var percent: Double
     public var resetsAt: Date?
+    /// Model the limit applies to, from `scope.model.display_name`.
+    public var modelName: String? = nil
 
-    /// "session" → "Session", "weekly_all" → "Week", "weekly_opus" → "Week · Opus".
+    /// "session" → "Session", "weekly_all" → "Weekly", "weekly_opus" → "Weekly · Opus",
+    /// "weekly_scoped" with model "Fable" → "Weekly · Fable".
     /// Kinds are snake_case and new ones appear without notice, so build the title from the parts.
     public var title: String {
         var parts = kind.split(separator: "_").map { String($0).capitalized }
         guard !parts.isEmpty else { return kind }
-        if parts[0] == "Weekly" { parts[0] = "Week" }
         parts.removeAll { $0 == "All" }
-        let scope = parts.dropFirst().joined(separator: " ")
+        let scope = modelName ?? parts.dropFirst().joined(separator: " ")
         return scope.isEmpty ? parts[0] : "\(parts[0]) · \(scope)"
     }
 }

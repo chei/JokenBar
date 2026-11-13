@@ -46,7 +46,7 @@ struct UsageSnapshotTests {
 
         #expect(snapshot.dollarWindows.isEmpty)
         #expect(snapshot.monthlyBudget == nil)
-        #expect(snapshot.percentLimits.map(\.kind) == ["session", "weekly_all"])
+        #expect(snapshot.percentLimits.map(\.title) == ["Session", "Weekly", "Weekly · Fable"])
 
         let headline = snapshot.headline(now: date("2026-10-19T08:00:00Z"))
         #expect(headline.shortText == "3%")
@@ -61,7 +61,7 @@ struct UsageSnapshotTests {
         let json = String(decoding: try fixture("pro_usage"), as: UTF8.self)
             .replacingOccurrences(of: "\"percent\": 0", with: "\"percent\": 40")
         let snapshot = try UsageSnapshot.parse(Data(json.utf8))
-        #expect(snapshot.percentLimits.map(\.percent) == [3, 40])
+        #expect(snapshot.percentLimits.map(\.percent) == [3, 40, 15])
         #expect(snapshot.headline().shortText == "3%")
     }
 
@@ -70,6 +70,9 @@ struct UsageSnapshotTests {
         let snapshot = try UsageSnapshot.parse(data)
         #expect(snapshot.dollarWindows.first?.remaining == 5)
         #expect(snapshot.headline().level == .critical)
+
+        let odd = Data(#"{"limits": [{"kind": "weekly_scoped", "percent": 5, "scope": "surprise"}]}"#.utf8)
+        #expect(try UsageSnapshot.parse(odd).percentLimits.map(\.title) == ["Weekly · Scoped"])
     }
 
     @Test func dateParsingWithMicroseconds() throws {
@@ -127,9 +130,10 @@ struct UsageSnapshotTests {
     @Test func limitTitlesAreReadable() {
         func title(_ kind: String) -> String { PercentLimit(kind: kind, percent: 0).title }
         #expect(title("session") == "Session")
-        #expect(title("weekly_all") == "Week")
-        #expect(title("weekly_opus") == "Week · Opus")
-        #expect(title("weekly_oauth_apps") == "Week · Oauth Apps")
+        #expect(title("weekly_all") == "Weekly")
+        #expect(title("weekly_opus") == "Weekly · Opus")
+        #expect(title("weekly_oauth_apps") == "Weekly · Oauth Apps")
+        #expect(PercentLimit(kind: "weekly_scoped", percent: 0, modelName: "Fable").title == "Weekly · Fable")
     }
 
     @Test func levelThresholds() {
