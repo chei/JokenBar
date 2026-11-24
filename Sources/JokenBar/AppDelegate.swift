@@ -178,12 +178,12 @@ final class AppDelegate: NSObject, NSApplicationDelegate, NSPopoverDelegate {
 
     private func updateStatusItem() {
         guard let button = statusItem?.button else { return }
-        let headline = model.menuBarSnapshot?.headline() ?? .unknown
+        let headlines = model.menuBarSnapshots.map { $0.headline() }.filter { $0 != .unknown }
 
-        button.image = StatusIcon.image(level: headline.level?.color)
+        button.image = StatusIcon.image(level: worstLevel(of: headlines)?.color)
         button.imagePosition = .imageLeading
         button.imageHugsTitle = true
-        button.title = headline != .unknown ? headline.shortText : ""
+        button.title = headlines.map(\.shortText).joined(separator: " · ")
         button.toolTip = model.hotKeyEnabled ? "JokenBar – ⌃⌥J" : "JokenBar"
     }
 }

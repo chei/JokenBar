@@ -1,6 +1,6 @@
 import Foundation
 
-public enum Level: Equatable {
+public enum Level: Comparable {
     case ok, warning, critical
 
     /// Orange from 75% used, red from 90% used.
@@ -37,4 +37,9 @@ public enum Headline: Equatable {
         guard let usedFraction else { return "–" }
         return "\(Int((usedFraction * 100).rounded()))%"
     }
+}
+
+/// The icon color for several accounts: the most used one decides.
+public func worstLevel(of headlines: [Headline]) -> Level? {
+    headlines.compactMap(\.level).max()
 }

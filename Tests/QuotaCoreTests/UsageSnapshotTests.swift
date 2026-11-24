@@ -65,6 +65,14 @@ struct UsageSnapshotTests {
         #expect(snapshot.headline().shortText == "3%")
     }
 
+    @Test func worstLevelAcrossAccounts() throws {
+        let ok = Headline.percent(PercentLimit(kind: "session", percent: 3, resetsAt: nil))
+        let critical = Headline.percent(PercentLimit(kind: "session", percent: 95, resetsAt: nil))
+        #expect(worstLevel(of: [ok, critical, .unknown]) == .critical)
+        #expect(worstLevel(of: [ok]) == .ok)
+        #expect(worstLevel(of: []) == nil)
+    }
+
     @Test func unexpectedShapesDoNotThrow() throws {
         let data = Data(#"{"limits": "surprise", "new_thing": {"limit_dollars": 50, "used_dollars": 45}}"#.utf8)
         let snapshot = try UsageSnapshot.parse(data)
