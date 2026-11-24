@@ -56,14 +56,14 @@ final class AppModel: ObservableObject {
 
     // MARK: Menu bar
 
-    /// The org shown in the menu bar: the topmost one that loaded.
-    var menuBarSnapshot: UsageSnapshot? {
-        for account in accounts {
+    /// One snapshot per account for the menu bar: each account's topmost org that loaded.
+    var menuBarSnapshots: [UsageSnapshot] {
+        accounts.compactMap { account in
             for org in account.organizations {
                 if case .loaded(let snapshot)? = states[org.uuid] { return snapshot }
             }
+            return nil
         }
-        return nil
     }
 
     // MARK: Refresh

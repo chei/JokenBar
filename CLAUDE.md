@@ -20,7 +20,7 @@ Tiny macOS menu bar app showing Claude / Claude Code usage limits.
   - `spend` (fallback `extra_usage`): monthly per-user spend limit in minor units (`amount_minor`, `exponent`). No reset date is returned; the app shows only the time left until midnight on the 1st ("8d left"). Weekly limits show the reset weekday, session limits only the time.
   - `limits[]` (fallback `five_hour`/`seven_day`): Pro/Max percent limits. Empty on Enterprise. `scope.model.display_name` names a model-only limit (`weekly_scoped` → "Weekly · Fable").
   - `cedar_ember.grants[]`: promotional usage-limit resets.
-- Menu bar headline priority: active included allowance → monthly limit → highest percent limit.
+- Menu bar headline priority: active included allowance → monthly limit → session limit → highest percent limit. One headline per account (its topmost loaded org), joined with " · "; the icon takes the worst level.
 - Enterprise claude.ai sessions typically expire after 7 days; the popover then shows "Session expired – Sign In…".
 
 ## Release
